@@ -37,7 +37,7 @@ public class Task {
     @Enumerated(EnumType.STRING)
     @NotNull(message = "Priority is required. Accepted values are: LOW, NORMAL, HIGH")
     @Column(name = "priority")
-    private int priority;
+    private Priority priority;
 
     @NotBlank(message = "Due Date is required")
     @Column(name = "due_date")
@@ -68,7 +68,7 @@ public class Task {
 
     protected Task() {}
 
-    public Task(String title, String description, Status status, int priority, LocalDate dueDate, String comment, User user) {
+    public Task(String title, String description, Status status, Priority priority, LocalDate dueDate, String comment, User user) {
         this.title = title;
         this.description = description;
         this.status = status;
@@ -111,11 +111,11 @@ public class Task {
     }
 
     @NotNull(message = "Priority is required. Accepted values are: LOW, NORMAL, HIGH")
-    public int getPriority() {
+    public Priority getPriority() {
         return priority;
     }
 
-    public void setPriority(@NotNull(message = "Priority is required. Accepted values are: LOW, NORMAL, HIGH") int priority) {
+    public void setPriority(@NotNull(message = "Priority is required. Accepted values are: LOW, NORMAL, HIGH") Priority priority) {
         this.priority = priority;
     }
 

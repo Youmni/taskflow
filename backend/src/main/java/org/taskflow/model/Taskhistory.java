@@ -36,7 +36,7 @@ public class Taskhistory {
     @Enumerated(EnumType.STRING)
     @NotNull(message = "Priority is required. Accepted values are: LOW, NORMAL, HIGH")
     @Column(name = "priority")
-    private int priority;
+    private Priority priority;
 
     @NotBlank(message = "Due Date is required")
     @Column(name = "due_date")
@@ -62,7 +62,7 @@ public class Taskhistory {
 
     protected Taskhistory() {}
 
-    public Taskhistory(String title, String description, Status status, int priority, LocalDate dueDate, String comment, User user, Task task) {
+    public Taskhistory(String title, String description, Status status, Priority priority, LocalDate dueDate, String comment, User user, Task task) {
 
         this.title = title;
         this.description = description;
@@ -115,11 +115,11 @@ public class Taskhistory {
     }
 
     @NotNull(message = "Priority is required. Accepted values are: LOW, NORMAL, HIGH")
-    public int getPriority() {
+    public Priority getPriority() {
         return priority;
     }
 
-    public void setPriority(@NotNull(message = "Priority is required. Accepted values are: LOW, NORMAL, HIGH") int priority) {
+    public void setPriority(@NotNull(message = "Priority is required. Accepted values are: LOW, NORMAL, HIGH") Priority priority) {
         this.priority = priority;
     }
 
