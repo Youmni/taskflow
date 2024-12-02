@@ -4,10 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.taskflow.model.Priority;
-import org.taskflow.model.Status;
-import org.taskflow.model.Task;
-import org.taskflow.model.Taskhistory;
+import org.taskflow.model.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -15,7 +12,7 @@ import java.util.List;
 
 public interface TaskHistoryRepository extends JpaRepository<Taskhistory, Integer> {
 
-    List<Taskhistory> findByHistoryId(int historyId);
+    List<Taskhistory> findById(TaskHistoryKey historyId);
     List<Taskhistory> findByTitle(String name);
     List<Taskhistory> findByTitleContainingIgnoreCase(String title);
     List<Taskhistory> findByDueDate(LocalDate dueDate, Sort sort);
@@ -30,6 +27,8 @@ public interface TaskHistoryRepository extends JpaRepository<Taskhistory, Intege
     List<Taskhistory> findByPriority(Priority priority, Sort sort);
     List<Taskhistory> findByPriorityIn(List<Priority> priorities, Sort sort);
     List<Taskhistory> findByTask(Task task, Sort sort);
+    List<Taskhistory> findByTask(Task task);
+
 
     Page<Taskhistory> findByTask(Task task, Pageable pageable);
 

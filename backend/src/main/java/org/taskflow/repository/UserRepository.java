@@ -15,9 +15,9 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     List<User> findAll(Sort sort);
     List<User> findByUserId(int userId);
     List<User> findByEmail(String email);
-    List<User> findByEmailContaining(String email);
+    List<User> findByEmailContainingIgnoreCase(String email);
     List<User> findByUsername(String username);
-    List<User> findByUsernameContaining(String username);
+    List<User> findByUsernameContainingIgnoreCase(String username);
     List<User> findByCreatedAtBetween(LocalDateTime from, LocalDateTime to, Sort sort);
     List<User> findByCreatedAtBefore(LocalDateTime localDateTime, Sort sort);
     List<User> findByCreatedAtAfter(LocalDateTime localDateTime, Sort sort);
@@ -32,5 +32,8 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     Page<User> findByUpdatedAtBetween(LocalDateTime from, LocalDateTime to, Pageable pageable);
     Page<User> findByUpdatedAtBefore(LocalDateTime localDateTime, Pageable pageable);
     Page<User> findByUpdatedAtAfter(LocalDateTime localDateTime, Pageable pageable);
+
+    boolean existsByUserId(int userId);
+    boolean existsByUsername(String username);
 
 }

@@ -12,7 +12,7 @@ public interface GroupRepository extends JpaRepository<Group, Integer> {
 
     List<Group> findByGroupId(int groupId);
     List<Group> findByGroupName(String groupName);
-    List<Group> findByGroupNameContaining(String groupName);
+    List<Group> findByGroupNameContainingIgnoreCase(String groupName);
     List<Group> findByGroupNameStartingWith(String groupName);
     List<Group> findByCreatedAtBetween(LocalDateTime from, LocalDateTime to);
     List<Group> findByCreatedAtBefore(LocalDateTime localDateTime);

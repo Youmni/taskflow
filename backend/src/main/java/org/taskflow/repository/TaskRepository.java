@@ -43,4 +43,7 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
     Page<Task> findByCreatedAtBefore(LocalDateTime createdAt, Pageable pageable);
     Page<Task> findByCreatedAtAfter(LocalDateTime createdAt, Pageable pageable);
 
+    boolean existsByTaskId(int taskId);
+    boolean existsByTitle(String title);
+
 }
