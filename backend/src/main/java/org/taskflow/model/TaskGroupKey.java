@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 @Embeddable
 public class TaskGroupKey implements Serializable {
@@ -15,6 +16,21 @@ public class TaskGroupKey implements Serializable {
     private int groupId;
 
     protected TaskGroupKey() {}
+
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TaskGroupKey that = (TaskGroupKey) o;
+        return taskId == that.taskId && groupId == that.groupId;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(taskId, groupId);
+    }
 
     public int getTaskId() {
         return taskId;
