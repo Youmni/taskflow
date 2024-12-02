@@ -13,10 +13,8 @@ import java.time.LocalDateTime;
 @Entity
 public class Taskhistory {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "history_id")
-    private int historyId;
+    @EmbeddedId
+    private TaskHistoryKey id;
 
     @NotBlank(message = "Title is required")
     @Size(min = 5, max = 40, message = "Title must be between 5 and 40 characters")
@@ -74,12 +72,12 @@ public class Taskhistory {
         this.task = task;
     }
 
-    public int getHistoryId() {
-        return historyId;
+    public TaskHistoryKey getId() {
+        return id;
     }
 
-    public void setHistoryId(int historyId) {
-        this.historyId = historyId;
+    public void setId(TaskHistoryKey id) {
+        this.id = id;
     }
 
     public LocalDateTime getCreatedAt() {
