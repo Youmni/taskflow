@@ -1,10 +1,10 @@
 package org.taskflow.service;
 
+import com.nimbusds.jose.JOSEException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.taskflow.DTO.AuthDTO;
@@ -18,7 +18,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Service
-public class UserDataService {
+public class UserService {
 
     BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
 
@@ -39,6 +39,7 @@ public class UserDataService {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body("User already exist");
             }
+            user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
             userRepository.save(user);
             return ResponseEntity.status(HttpStatus.CREATED).body("User successfully added");
         }catch(Exception e){
@@ -47,26 +48,15 @@ public class UserDataService {
         }
     }
 
-    public ResponseEntity<String> authenticateUser(AuthDTO authDTO) {
+    public ResponseEntity<String> authenticateUser(AuthDTO authDTO) throws JOSEException {
         Optional<User> userOpt = userRepository.findByUsername(authDTO.getUsername()).stream().findFirst();
         if (userOpt.isEmpty() || !bCryptPasswordEncoder.matches(authDTO.getPassword(), userOpt.get().getPassword())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
         }
-        String token = jwtService.generateToken(new AuthDTO( authDTO.getPassword(),userOpt.get().getUserId(), authDTO.getUsername()));
+        String token = jwtService.generateToken(userOpt.get().getUserId());
         return ResponseEntity.ok(token);
     }
 
-    public UserDetails loadUserById(int userId) {
-        User user = userRepository.findByUserId(userId).getFirst();
-        if(user == null){
-            throw new RuntimeException("User not found");
-        }
-        return org.springframework.security.core.userdetails.User.builder()
-                .username(user.getUsername())
-                .password(user.getPassword())
-                .authorities("USER")
-                .build();
-    }
 
     public ResponseEntity<String> deleteUser (int userId) {
         if(!userRepository.existsByUserId(userId)){

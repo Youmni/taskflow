@@ -13,13 +13,13 @@ import java.util.List;
 @Service
 public class UserGroupService {
 
-    private UserDataService userDataService;
+    private UserService userService;
     private GroupService groupService;
     private UserGroupRepository userGroupRepository;
 
     @Autowired
-    public void setUserDataService(UserDataService userDataService) {
-        this.userDataService = userDataService;
+    public void setUserDataService(UserService userService) {
+        this.userService = userService;
     }
 
     @Autowired
@@ -34,9 +34,9 @@ public class UserGroupService {
     }
 
     public void addUserGroup(int groupId, int userId) {
-        if(userDataService.isValidUser(userId) && groupService.isValidGroup(groupId)) {
+        if(userService.isValidUser(userId) && groupService.isValidGroup(groupId)) {
             try{
-                User user = userDataService.getUserById(userId);
+                User user = userService.getUserById(userId);
                 Group group = groupService.getGroupById(groupId);
 
                 if (user == null || group == null) {
@@ -52,13 +52,13 @@ public class UserGroupService {
     }
 
     public boolean isUserInGroup(int groupId, int userId) throws Exception{
-        if (!userDataService.isValidUser(userId)) {
+        if (!userService.isValidUser(userId)) {
             throw new Exception("Invalid user");
         }
         if (!groupService.isValidGroup(groupId)) {
             throw new Exception("Invalid group");
         }
-        User user = userDataService.getUserById(userId);
+        User user = userService.getUserById(userId);
         Group group = groupService.getGroupById(groupId);
 
         if (user== null || group == null) {

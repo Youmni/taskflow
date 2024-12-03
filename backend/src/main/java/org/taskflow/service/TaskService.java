@@ -20,7 +20,7 @@ public class TaskService {
 
     private static final String ERROR_MESSAGE = "There was an error processing your request: ";
     private static final String ERROR_WRITE_PERMISSION ="You do not have permission to write to this task";
-    private UserDataService userDataService;
+    private UserService userService;
     private TaskHistoryService taskHistoryService;
     private TaskGroupService taskGroupService;
 
@@ -33,8 +33,8 @@ public class TaskService {
     private TaskRepository taskRepository;
 
     @Autowired
-    public void setUserDataService(UserDataService userDataService) {
-        this.userDataService = userDataService;
+    public void setUserDataService(UserService userService) {
+        this.userService = userService;
     }
 
     @Autowired
@@ -293,7 +293,7 @@ public class TaskService {
     }
 
     public List<Task> getTaskByUserid(int userId, Sort sort) {
-        User user = userDataService.getUserById(userId);
+        User user = userService.getUserById(userId);
         Sort finalSort = (sort == null) ? Sort.by(Sort.Order.asc("dueDate")) : sort;
         return taskRepository.findByUser(user, finalSort);
     }
