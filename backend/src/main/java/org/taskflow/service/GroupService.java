@@ -1,6 +1,7 @@
 package org.taskflow.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,22 +17,42 @@ import java.util.List;
 @Service
 public class GroupService {
 
-    private final TaskService taskService;
-    private final UserGroupRepository userGroupRepository;
-    private final UserGroupService userGroupService;
-    private final GroupService groupService;
-    private final UserService userService;
-    private final GroupRepository groupRepository;
-    private final TaskGroupRepository taskGroupRepository;
+    private TaskService taskService;
+    private UserGroupRepository userGroupRepository;
+    private UserGroupService userGroupService;
+    private UserDataService userDataService;
+    private GroupRepository groupRepository;
+    private TaskGroupRepository taskGroupRepository;
 
     @Autowired
-    public GroupService(TaskService taskService, UserGroupRepository userGroupRepository, UserGroupService userGroupService, GroupService groupService, UserService userService, GroupRepository groupRepository, TaskGroupRepository taskGroupRepository) {
+    @Lazy
+    public void setTaskService(TaskService taskService) {
         this.taskService = taskService;
+    }
+
+    @Autowired
+    public void setUserGroupRepository(UserGroupRepository userGroupRepository) {
         this.userGroupRepository = userGroupRepository;
+    }
+    @Autowired
+    @Lazy
+    public void setUserGroupService(UserGroupService userGroupService) {
         this.userGroupService = userGroupService;
-        this.groupService = groupService;
-        this.userService = userService;
+    }
+
+
+    @Autowired
+    public void setUserDataService(UserDataService userDataService) {
+        this.userDataService = userDataService;
+    }
+
+    @Autowired
+    public void setGroupRepository(GroupRepository groupRepository) {
         this.groupRepository = groupRepository;
+    }
+
+    @Autowired
+    public void setTaskGroupRepository(TaskGroupRepository taskGroupRepository) {
         this.taskGroupRepository = taskGroupRepository;
     }
 
@@ -51,9 +72,9 @@ public class GroupService {
 
     public ResponseEntity<String> addUserToGroup(int groupId, int userId) {
         try {
-            if (userService.isValidUser(userId) && isValidGroup(groupId)) {
+            if (userDataService.isValidUser(userId) && isValidGroup(groupId)) {
                 if (userGroupService.isUserInGroup(groupId, userId)) {
-                    User user = userService.getUserById(userId);
+                    User user = userDataService.getUserById(userId);
                     Group group = getGroupById(groupId);
                     UserGroup userGroup = new UserGroup(user, group);
                     userGroupRepository.save(userGroup);
@@ -75,9 +96,9 @@ public class GroupService {
 
     public ResponseEntity<String> removeUserFromGroup(int groupId, int userId) {
         try {
-            if (userService.isValidUser(userId) && isValidGroup(groupId)) {
+            if (userDataService.isValidUser(userId) && isValidGroup(groupId)) {
                 if (userGroupService.isUserInGroup(groupId, userId)) {
-                    User user = userService.getUserById(userId);
+                    User user = userDataService.getUserById(userId);
                     Group group = getGroupById(groupId);
                     List<UserGroup> userGroups = userGroupRepository.findByUserAndGroup(user, group);
                     userGroupRepository.delete(userGroups.getFirst());
@@ -97,8 +118,8 @@ public class GroupService {
         }
     }
     public List<UserGroup> getGroupsByUser(int userId) {
-        if (userService.isValidUser(userId)) {
-            User user = userService.getUserById(userId);
+        if (userDataService.isValidUser(userId)) {
+            User user = userDataService.getUserById(userId);
             return userGroupRepository.findByUser(user, Sort.by(Sort.Direction.ASC, "createdAt"));
         }else{
             return new ArrayList<>();
@@ -106,8 +127,8 @@ public class GroupService {
     }
 
     public TaskGroup getGroupByUserIdAndTaskId(int userId, int taskId) {
-        if(userService.isValidUser(userId) && isValidGroup(taskId)) {
-            User user = userService.getUserById(userId);
+        if(userDataService.isValidUser(userId) && isValidGroup(taskId)) {
+            User user = userDataService.getUserById(userId);
             Task task = taskService.getTaskById(taskId);
 
 
@@ -128,8 +149,8 @@ public class GroupService {
     }
 
     public List<UserGroup> getUsersByGroup(int groupId) {
-        if(groupService.isValidGroup(groupId)) {
-            Group group = groupService.getGroupById(groupId);
+        if(isValidGroup(groupId)) {
+            Group group = getGroupById(groupId);
             return userGroupRepository.findByGroup(group);
         }else{
             return new ArrayList<>();
@@ -146,8 +167,8 @@ public class GroupService {
     }
 
     public List<TaskGroup> getTaskByGroup(int groupId) {
-        if (groupService.isValidGroup(groupId)) {
-            Group group = groupService.getGroupById(groupId);
+        if (isValidGroup(groupId)) {
+            Group group = getGroupById(groupId);
             return taskGroupRepository.findByGroup(group);
         }else{
             return new ArrayList<>();
@@ -156,7 +177,7 @@ public class GroupService {
 
 
     public Group getGroupById(int groupId){
-        if(!groupService.isValidGroup(groupId)) {
+        if(!isValidGroup(groupId)) {
             return null;
         }
         return groupRepository.findByGroupId(groupId).getFirst();

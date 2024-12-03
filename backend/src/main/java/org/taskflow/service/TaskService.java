@@ -1,6 +1,7 @@
 package org.taskflow.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +11,6 @@ import org.taskflow.repository.TaskRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.SignStyle;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,19 +20,42 @@ public class TaskService {
 
     private static final String ERROR_MESSAGE = "There was an error processing your request: ";
     private static final String ERROR_WRITE_PERMISSION ="You do not have permission to write to this task";
-
-    private final UserService userService;
-    private final TaskHistoryService taskHistoryService;
-    private final TaskGroupService taskGroupService;
-    private final GroupService groupService;
-    private final TaskRepository taskRepository;
+    private UserDataService userDataService;
+    private TaskHistoryService taskHistoryService;
+    private TaskGroupService taskGroupService;
 
     @Autowired
-    public TaskService(UserService userService, TaskHistoryService taskHistoryService, TaskGroupService taskGroupService, GroupService groupService, TaskRepository taskRepository) {
-        this.userService = userService;
+    @Lazy
+    private GroupService groupService;
+
+    @Autowired
+    @Lazy
+    private TaskRepository taskRepository;
+
+    @Autowired
+    public void setUserDataService(UserDataService userDataService) {
+        this.userDataService = userDataService;
+    }
+
+    @Autowired
+    @Lazy
+    public void setTaskHistoryService(TaskHistoryService taskHistoryService) {
         this.taskHistoryService = taskHistoryService;
+    }
+
+    @Autowired
+    @Lazy
+    public void setTaskGroupService(TaskGroupService taskGroupService) {
         this.taskGroupService = taskGroupService;
+    }
+
+    @Autowired
+    public void setGroupService(GroupService groupService) {
         this.groupService = groupService;
+    }
+
+    @Autowired
+    public void setTaskRepository(TaskRepository taskRepository) {
         this.taskRepository = taskRepository;
     }
 
@@ -270,7 +293,7 @@ public class TaskService {
     }
 
     public List<Task> getTaskByUserid(int userId, Sort sort) {
-        User user = userService.getUserById(userId);
+        User user = userDataService.getUserById(userId);
         Sort finalSort = (sort == null) ? Sort.by(Sort.Order.asc("dueDate")) : sort;
         return taskRepository.findByUser(user, finalSort);
     }

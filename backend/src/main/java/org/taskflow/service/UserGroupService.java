@@ -1,34 +1,42 @@
 package org.taskflow.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.taskflow.model.Group;
 import org.taskflow.model.User;
 import org.taskflow.model.UserGroup;
-import org.taskflow.model.UserGroupKey;
 import org.taskflow.repository.UserGroupRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserGroupService {
 
-    private final UserService userService;
-    private final GroupService groupService;
-    private final UserGroupRepository userGroupRepository;
+    private UserDataService userDataService;
+    private GroupService groupService;
+    private UserGroupRepository userGroupRepository;
 
     @Autowired
-    public UserGroupService(UserService userService, GroupService groupService, UserGroupRepository userGroupRepository) {
-        this.userService = userService;
+    public void setUserDataService(UserDataService userDataService) {
+        this.userDataService = userDataService;
+    }
+
+    @Autowired
+    @Lazy
+    public void setGroupService(GroupService groupService) {
         this.groupService = groupService;
+    }
+
+    @Autowired
+    public void setUserGroupRepository(UserGroupRepository userGroupRepository) {
         this.userGroupRepository = userGroupRepository;
     }
 
     public void addUserGroup(int groupId, int userId) {
-        if(userService.isValidUser(userId) && groupService.isValidGroup(groupId)) {
+        if(userDataService.isValidUser(userId) && groupService.isValidGroup(groupId)) {
             try{
-                User user = userService.getUserById(userId);
+                User user = userDataService.getUserById(userId);
                 Group group = groupService.getGroupById(groupId);
 
                 if (user == null || group == null) {
@@ -44,13 +52,13 @@ public class UserGroupService {
     }
 
     public boolean isUserInGroup(int groupId, int userId) throws Exception{
-        if (!userService.isValidUser(userId)) {
+        if (!userDataService.isValidUser(userId)) {
             throw new Exception("Invalid user");
         }
         if (!groupService.isValidGroup(groupId)) {
             throw new Exception("Invalid group");
         }
-        User user = userService.getUserById(userId);
+        User user = userDataService.getUserById(userId);
         Group group = groupService.getGroupById(groupId);
 
         if (user== null || group == null) {

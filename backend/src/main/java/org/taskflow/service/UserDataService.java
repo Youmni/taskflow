@@ -1,31 +1,35 @@
 package org.taskflow.service;
 
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.taskflow.DTO.LoginDTO;
-import org.taskflow.model.Task;
+import org.taskflow.DTO.AuthDTO;
+import org.taskflow.config.JwtService;
 import org.taskflow.model.User;
 import org.taskflow.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Service
-public class UserService {
+public class UserDataService {
 
     BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
 
-    private final UserRepository userRepository;
+
+    private UserRepository userRepository;
 
     @Autowired
-    public UserService(UserRepository userRepository) {
+    private JwtService jwtService;
+
+    @Autowired
+    public void setUserRepository(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
@@ -43,27 +47,25 @@ public class UserService {
         }
     }
 
-    public ResponseEntity<String> authenticateUser (LoginDTO user) {
-        try{
-            if(!userRepository.existsByUsername(user.getUsername())){
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("User does not exist");
-            }
-            List<User> users = userRepository.findByUsername(user.getUsername());
-
-            if(!bCryptPasswordEncoder.matches(user.getPassword(), users.getFirst().getPassword())){
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body("Incorrect credentials");
-            }
-            else{
-                //will be replaced with jwt token later
-                return ResponseEntity.ok()
-                        .body("User successfully authenticated");
-            }
-        }catch(Exception e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("There was an error processing your request: " + e.getMessage());
+    public ResponseEntity<String> authenticateUser(AuthDTO authDTO) {
+        Optional<User> userOpt = userRepository.findByUsername(authDTO.getUsername()).stream().findFirst();
+        if (userOpt.isEmpty() || !bCryptPasswordEncoder.matches(authDTO.getPassword(), userOpt.get().getPassword())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
         }
+        String token = jwtService.generateToken(new AuthDTO( authDTO.getPassword(),userOpt.get().getUserId(), authDTO.getUsername()));
+        return ResponseEntity.ok(token);
+    }
+
+    public UserDetails loadUserById(int userId) {
+        User user = userRepository.findByUserId(userId).getFirst();
+        if(user == null){
+            throw new RuntimeException("User not found");
+        }
+        return org.springframework.security.core.userdetails.User.builder()
+                .username(user.getUsername())
+                .password(user.getPassword())
+                .authorities("USER")
+                .build();
     }
 
     public ResponseEntity<String> deleteUser (int userId) {

@@ -1,6 +1,7 @@
 package org.taskflow.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -18,14 +19,23 @@ import java.util.List;
 @Service
 public class TaskGroupService {
 
-    private final TaskGroupRepository taskGroupRepository;
-    private final GroupService groupService;
-    private final TaskService taskService;
+    private TaskGroupRepository taskGroupRepository;
+    private GroupService groupService;
+    private TaskService taskService;
 
     @Autowired
-    public TaskGroupService(TaskGroupRepository taskGroupRepository, GroupService groupService, TaskService taskService) {
+    public void setTaskGroupRepository(TaskGroupRepository taskGroupRepository) {
         this.taskGroupRepository = taskGroupRepository;
+    }
+
+    @Autowired
+    public void setGroupService(GroupService groupService) {
         this.groupService = groupService;
+    }
+
+    @Autowired
+    @Lazy
+    public void setTaskService(TaskService taskService) {
         this.taskService = taskService;
     }
 

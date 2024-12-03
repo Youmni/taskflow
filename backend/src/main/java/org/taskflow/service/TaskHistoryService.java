@@ -1,6 +1,7 @@
 package org.taskflow.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -20,18 +21,32 @@ import java.util.List;
 @Service
 public class TaskHistoryService {
 
-    private final TaskRepository taskRepository;
-    private final TaskService taskService;
-    private final UserRepository userRepository;
-    private final TaskHistoryRepository taskHistoryRepository;
+    private TaskRepository taskRepository;
+    private TaskService taskService;
+    private UserRepository userRepository;
+    private TaskHistoryRepository taskHistoryRepository;
 
     @Autowired
-    public TaskHistoryService(TaskRepository taskRepository, TaskService taskService, UserRepository userRepository, TaskHistoryRepository taskHistoryRepository) {
+    public void setTaskRepository(TaskRepository taskRepository) {
         this.taskRepository = taskRepository;
+    }
+
+    @Autowired
+    @Lazy
+    public void setTaskService(TaskService taskService) {
         this.taskService = taskService;
+    }
+
+    @Autowired
+    public void setUserRepository(UserRepository userRepository) {
         this.userRepository = userRepository;
+    }
+
+    @Autowired
+    public void setTaskHistoryRepository(TaskHistoryRepository taskHistoryRepository) {
         this.taskHistoryRepository = taskHistoryRepository;
     }
+
 
     public ResponseEntity<String> createTaskHistory(Task task, int userId) {
         if(!taskRepository.existsByTaskId(task.getTaskId())) {
