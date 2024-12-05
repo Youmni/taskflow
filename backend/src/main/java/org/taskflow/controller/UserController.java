@@ -21,8 +21,7 @@ public class UserController {
     @CrossOrigin
     @PostMapping(value = "/create")
     public ResponseEntity<String> addUser(@Valid @RequestBody User user){
-        userService.createUser(user);
-        return ResponseEntity.ok("User added");
+        return userService.createUser(user);
     }
 
     @CrossOrigin

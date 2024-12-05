@@ -19,11 +19,9 @@ import java.util.List;
 public class TaskController {
 
     private final TaskService taskService;
-    private final UserService userService;
 
-    public TaskController(TaskService taskService, UserService userService) {
+    public TaskController(TaskService taskService) {
         this.taskService = taskService;
-        this.userService = userService;
     }
 
     @CrossOrigin
@@ -69,14 +67,46 @@ public class TaskController {
     }
 
     @CrossOrigin
+    @GetMapping(value = "/{userId}/due-date")
+    public List<Task> getTasksByUserForDueDate(@PathVariable int userId, @RequestParam LocalDate dueDate) {
+        return taskService.getTaskByDueDateAndUserId(dueDate, userId);
+    }
+
+
+    @CrossOrigin
+    @GetMapping(value = "/{userId}/due-date/after")
+    public List<Task> getTasksByUserForDueDateAfter(@PathVariable int userId, @RequestParam LocalDate dueDate) {
+        return taskService.getTaskByDueDateAfterAndUserId(dueDate, userId);
+    }
+
+    @CrossOrigin
+    @GetMapping(value = "/{userId}/duedate/before")
+    public List<Task> getTasksByUserForDueDateBefore(@PathVariable int userId, @RequestParam LocalDate dueDate) {
+        return taskService.getTaskByDueDateBeforeAndUserId(dueDate,userId);
+    }
+
+
+    @CrossOrigin
     @GetMapping(value = "/shared/{userId}/priority")
     public List<Task> getTasksForUsersByPriority(@PathVariable int userId, @RequestParam Priority priority) {
         return taskService.getTasksForUsersByPriority(userId, priority);
     }
+
+    @CrossOrigin
+    @GetMapping(value = "/{userId}/priority")
+    public List<Task> getTasksByUserForPriority(@PathVariable int userId, @RequestParam Priority priority) {
+        return taskService.getTaskByPriorityAndUserId(priority, userId);
+    }
+
     @CrossOrigin
     @GetMapping(value = "/shared/{userId}/status")
     public List<Task> getTasksForUsersByStatus(@PathVariable int userId, @RequestParam Status status) {
         return taskService.getTasksForUsersByStatus(userId, status);
     }
 
+    @CrossOrigin
+    @GetMapping(value = "/{userId}/status")
+    public List<Task> getTasksByUsersForStatus(@PathVariable int userId, @RequestParam Status status) {
+        return taskService.getTasksForUsersByStatus(userId, status);
+    }
 }
