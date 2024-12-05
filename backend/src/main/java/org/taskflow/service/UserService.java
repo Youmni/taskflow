@@ -173,6 +173,4 @@ public class UserService {
     public boolean isValidUser(int userId){
         return userRepository.existsByUserId(userId);
     }
-
-
 }

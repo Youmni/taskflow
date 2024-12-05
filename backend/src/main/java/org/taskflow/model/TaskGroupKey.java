@@ -17,7 +17,10 @@ public class TaskGroupKey implements Serializable {
 
     protected TaskGroupKey() {}
 
-
+    public TaskGroupKey(int taskId, int groupId) {
+        this.taskId = taskId;
+        this.groupId = groupId;
+    }
 
     @Override
     public boolean equals(Object o) {

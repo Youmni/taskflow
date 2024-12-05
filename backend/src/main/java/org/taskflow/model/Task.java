@@ -1,6 +1,8 @@
 package org.taskflow.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -39,7 +41,8 @@ public class Task {
     @Column(name = "priority")
     private Priority priority;
 
-    @NotBlank(message = "Due Date is required")
+    @NotNull(message = "Due Date is required")
+    @Future(message = "Due Date must be in the future")
     @Column(name = "due_date")
     private LocalDate dueDate;
 
@@ -50,12 +53,15 @@ public class Task {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     @NotNull(message = "User is required")
+    @JsonBackReference
     private User user;
 
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
+    @JsonBackReference
     private Set<Taskhistory> taskhistories;
 
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonBackReference
     Set<TaskGroup> taskGroups;
 
     @CreationTimestamp
@@ -119,11 +125,11 @@ public class Task {
         this.priority = priority;
     }
 
-    public @NotBlank(message = "Due Date is required") LocalDate getDueDate() {
+    public @NotNull(message = "Due Date is required") LocalDate getDueDate() {
         return dueDate;
     }
 
-    public void setDueDate(@NotBlank(message = "Due Date is required") LocalDate dueDate) {
+    public void setDueDate(@NotNull(message = "Due Date is required") LocalDate dueDate) {
         this.dueDate = dueDate;
     }
 

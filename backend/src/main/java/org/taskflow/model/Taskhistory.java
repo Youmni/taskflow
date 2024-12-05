@@ -1,5 +1,6 @@
 package org.taskflow.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -36,7 +37,7 @@ public class Taskhistory {
     @Column(name = "priority")
     private Priority priority;
 
-    @NotBlank(message = "Due Date is required")
+    @NotNull(message = "Due Date is required")
     @Column(name = "due_date")
     private LocalDate dueDate;
 
@@ -47,10 +48,12 @@ public class Taskhistory {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     @NotNull(message = "User is required")
+    @JsonBackReference
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "task_id", nullable = false)
+    @MapsId("taskId")
+    @JoinColumn(name = "task_id")
     @NotNull(message = "Task is required")
     private Task task;
 
@@ -145,11 +148,11 @@ public class Taskhistory {
         this.title = title;
     }
 
-    public @NotBlank(message = "Due Date is required") LocalDate getDueDate() {
+    public @NotNull(message = "Due Date is required") LocalDate getDueDate() {
         return dueDate;
     }
 
-    public void setDueDate(@NotBlank(message = "Due Date is required") LocalDate dueDate) {
+    public void setDueDate(@NotNull(message = "Due Date is required") LocalDate dueDate) {
         this.dueDate = dueDate;
     }
 

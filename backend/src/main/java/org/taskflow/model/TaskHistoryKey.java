@@ -11,17 +11,18 @@ import java.util.Objects;
 @Embeddable
 public class TaskHistoryKey implements Serializable {
 
-    @Column(name = "history_id")
-    private int historyId;
-
     @Column(name = "task_id")
     private int taskId;
 
+    @Column(name = "history_id")
+    private int historyId;
+
+
     protected TaskHistoryKey() {}
 
-    public TaskHistoryKey(int historyId, int taskId) {
-        this.historyId = historyId;
+    public TaskHistoryKey(int taskId, int historyId) {
         this.taskId = taskId;
+        this.historyId = historyId;
     }
 
     @Override
