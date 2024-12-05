@@ -80,9 +80,6 @@ public class TaskHistoryService {
             TaskHistoryKey taskHistoryKey = new TaskHistoryKey(task.getTaskId(), historyId);
             taskhistory.setId(taskHistoryKey);
 
-            System.out.println(taskhistory.getTask().getTitle());
-            System.out.println(taskhistory.getId());
-
             taskHistoryRepository.save(taskhistory);
 
             return ResponseEntity.status(HttpStatus.CREATED)

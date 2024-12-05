@@ -127,9 +127,6 @@ public class UserService {
         }
     }
 
-    public List<User> getUsersById(int userId){
-        return userRepository.findByUserId(userId);
-    }
     public User getUserById(int userId){
         return userRepository.findByUserId(userId).getFirst();
     }
@@ -138,32 +135,11 @@ public class UserService {
         return userRepository.findByUsername(username).getFirst();
     }
 
-    public List<User> getUserByUsernameContaining(String username){
-        return userRepository.findByUsernameContainingIgnoreCase(username);
-    }
 
     public User getUserByEmail(String email){
         return userRepository.findByEmail(email).getFirst();
     }
 
-    public List<User> getUserByEmailContaining(String email){
-        return userRepository.findByEmailContainingIgnoreCase(email);
-    }
-
-    public List<User> getTaskByCreatedAtBefore(LocalDateTime createdAt, Sort sort) {
-        Sort finalSort = (sort == null) ? Sort.by(Sort.Order.asc("createdAt")) : sort;
-        return userRepository.findByCreatedAtBefore(createdAt, finalSort);
-    }
-
-    public List<User> getTaskByCreatedAtAfter(LocalDateTime createdAt, Sort sort) {
-        Sort finalSort = (sort == null) ? Sort.by(Sort.Order.asc("createdAt")) : sort;
-        return userRepository.findByCreatedAtAfter(createdAt, finalSort);
-    }
-
-    public List<User> getTaskByCreatedAtBetween(LocalDateTime from, LocalDateTime to, Sort sort) {
-        Sort finalSort = (sort == null) ? Sort.by(Sort.Order.asc("createdAt")) : sort;
-        return userRepository.findByCreatedAtBetween(from, to, finalSort);
-    }
 
     private boolean isValidEmail(String email) {
         String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
