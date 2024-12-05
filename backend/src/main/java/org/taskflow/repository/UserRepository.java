@@ -25,14 +25,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     List<User> findByUpdatedAtBefore(LocalDateTime localDateTime, Sort sort);
     List<User> findByUpdatedAtAfter(LocalDateTime localDateTime, Sort sort);
 
-    Page<User> findByCreatedAtBetween(LocalDateTime from, LocalDateTime to, Pageable pageable);
-    Page<User> findByCreatedAtBefore(LocalDateTime localDateTime, Pageable pageable);
-    Page<User> findByCreatedAtAfter(LocalDateTime localDateTime, Pageable pageable);
-
-    Page<User> findByUpdatedAtBetween(LocalDateTime from, LocalDateTime to, Pageable pageable);
-    Page<User> findByUpdatedAtBefore(LocalDateTime localDateTime, Pageable pageable);
-    Page<User> findByUpdatedAtAfter(LocalDateTime localDateTime, Pageable pageable);
-
     boolean existsByUserId(int userId);
     boolean existsByUsername(String username);
 

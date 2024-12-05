@@ -21,11 +21,4 @@ public interface GroupRepository extends JpaRepository<Group, Integer> {
     List<Group> findByUpdatedAtBefore(LocalDateTime localDateTime);
     List<Group> findByUpdatedAtAfter(LocalDateTime localDateTime);
 
-    Page<Group> findByCreatedAtBetween(LocalDateTime from, LocalDateTime to, Pageable pageable);
-    Page<Group> findByCreatedAtBefore(LocalDateTime localDateTime, Pageable pageable);
-    Page<Group> findByCreatedAtAfter(LocalDateTime localDateTime, Pageable pageable);
-    Page<Group> findByUpdatedAtBetween(LocalDateTime from, LocalDateTime to, Pageable pageable);
-    Page<Group> findByUpdatedAtBefore(LocalDateTime localDateTime, Pageable pageable);
-    Page<Group> findByUpdatedAtAfter(LocalDateTime localDateTime, Pageable pageable);
-
 }
