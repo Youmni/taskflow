@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.taskflow.model.Group;
 import org.taskflow.model.User;
 import org.taskflow.model.UserGroup;
+import org.taskflow.model.UserGroupKey;
 import org.taskflow.repository.UserGroupRepository;
 
 import java.util.List;
@@ -43,7 +44,10 @@ public class UserGroupService {
                     throw new Exception("User or Group not found");
                 }
 
+                UserGroupKey userGroupKey = new UserGroupKey(userId, groupId);
                 UserGroup userGroup = new UserGroup(user, group);
+                userGroup.setId(userGroupKey);
+
                 userGroupRepository.save(userGroup);
             }catch(Exception e){
                 System.err.println(e.getMessage());

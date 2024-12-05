@@ -13,6 +13,8 @@ import org.taskflow.repository.UserGroupRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class GroupService {
@@ -56,12 +58,31 @@ public class GroupService {
         this.taskGroupRepository = taskGroupRepository;
     }
 
-    public ResponseEntity<String> createGroup(Group group, List<User> users) {
+    public ResponseEntity<String> createGroupWithUsers(Group group, List<Integer> usersIds, int ownerId) {
         try {
             groupRepository.save(group);
-            for (User user : users) {
-                userGroupService.addUserGroup(group.getGroupId(), user.getUserId());
+
+            if (!usersIds.contains(ownerId)) {
+                usersIds.add(ownerId);
             }
+
+            usersIds.stream()
+                    .map(userService::getUserById)
+                    .filter(Objects::nonNull)
+                    .forEach(user ->
+                            userGroupService.addUserGroup(group.getGroupId(), user.getUserId())
+                    );
+
+            return ResponseEntity.ok("Group created successfully");
+        }catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("There was an error processing your request: " + e.getMessage());
+        }
+    }
+
+    public ResponseEntity<String> createGroup(Group group) {
+        try {
+            groupRepository.save(group);
             return ResponseEntity.ok("Group created successfully");
         }catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -72,22 +93,24 @@ public class GroupService {
 
     public ResponseEntity<String> addUserToGroup(int groupId, int userId) {
         try {
-            if (userService.isValidUser(userId) && isValidGroup(groupId)) {
-                if (userGroupService.isUserInGroup(groupId, userId)) {
-                    User user = userService.getUserById(userId);
-                    Group group = getGroupById(groupId);
-                    UserGroup userGroup = new UserGroup(user, group);
-                    userGroupRepository.save(userGroup);
-                    return ResponseEntity.ok("User successfully added to group");
-                }else{
-                    return ResponseEntity.status(HttpStatus.CONFLICT)
-                            .body("User is already in group");
-                }
-
-            }else{
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("Invalid user ID or Group ID");
+            if (!userService.isValidUser(userId) || !isValidGroup(groupId)) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body("Invalid user ID or Group ID");
             }
+
+            if (userGroupService.isUserInGroup(groupId, userId)) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body("User is already in group");
+            }
+
+            User user = userService.getUserById(userId);
+            Group group = getGroupById(groupId);
+            UserGroup userGroup = new UserGroup(user, group);
+            UserGroupKey userGroupKey = new UserGroupKey(userId, groupId);
+            userGroup.setId(userGroupKey);
+            userGroupRepository.save(userGroup);
+
+            return ResponseEntity.ok("User successfully added to group");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("There was an error processing your request: " + e.getMessage());
@@ -96,42 +119,46 @@ public class GroupService {
 
     public ResponseEntity<String> removeUserFromGroup(int groupId, int userId) {
         try {
-            if (userService.isValidUser(userId) && isValidGroup(groupId)) {
-                if (userGroupService.isUserInGroup(groupId, userId)) {
-                    User user = userService.getUserById(userId);
-                    Group group = getGroupById(groupId);
-                    List<UserGroup> userGroups = userGroupRepository.findByUserAndGroup(user, group);
-                    userGroupRepository.delete(userGroups.getFirst());
-                    return ResponseEntity.ok("User successfully deleted from group");
-                }else{
-                    return ResponseEntity.status(HttpStatus.CONFLICT)
-                            .body("User not in group");
-                }
-
-            }else{
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            if (!userService.isValidUser(userId) && !isValidGroup(groupId)) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
                         .body("Invalid user ID or Group ID");
             }
+
+            if (!userGroupService.isUserInGroup(groupId, userId)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("User not in group");
+            }
+
+            User user = userService.getUserById(userId);
+            Group group = getGroupById(groupId);
+
+            userGroupRepository.findByUserAndGroup(user, group)
+                    .stream()
+                    .findFirst()
+                    .ifPresentOrElse(userGroupRepository::delete,
+                            () -> { throw new IllegalStateException("UserGroup not found despite validation.");
+                    });
+
+            return ResponseEntity.ok("User successfully deleted from group");
+
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("There was an error processing your request: " + e.getMessage());
         }
     }
-    public List<UserGroup> getGroupsByUser(int userId) {
-        if (userService.isValidUser(userId)) {
-            User user = userService.getUserById(userId);
-            return userGroupRepository.findByUser(user, Sort.by(Sort.Direction.ASC, "createdAt"));
-        }else{
+
+    public List<UserGroup> getGroupsByUserId(int userId) {
+        if (!userService.isValidUser(userId)) {
             return new ArrayList<>();
         }
+        User user = userService.getUserById(userId);
+        return userGroupRepository.findByUser(user, Sort.by(Sort.Direction.ASC, "createdAt"));
     }
 
     public TaskGroup getGroupByUserIdAndTaskId(int userId, int taskId) {
         if(userService.isValidUser(userId) && isValidGroup(taskId)) {
             User user = userService.getUserById(userId);
             Task task = taskService.getTaskById(taskId);
-
-
 
             List<UserGroup> userGroup = userGroupRepository
                     .findByUser(user, Sort.by(Sort.Direction.ASC, "createdAt"));
@@ -149,30 +176,27 @@ public class GroupService {
     }
 
     public List<UserGroup> getUsersByGroup(int groupId) {
-        if(isValidGroup(groupId)) {
-            Group group = getGroupById(groupId);
-            return userGroupRepository.findByGroup(group);
-        }else{
+        if(!isValidGroup(groupId)) {
             return new ArrayList<>();
         }
+        Group group = getGroupById(groupId);
+        return userGroupRepository.findByGroup(group);
     }
 
     public List<TaskGroup> getGroupsByTask(int taskId) {
-        if(taskService.isValidTask(taskId)) {
-            Task task = taskService.getTaskById(taskId);
-            return taskGroupRepository.findByTask(task);
-        }else{
+        if(!taskService.isValidTask(taskId)) {
             return new ArrayList<>();
         }
+        Task task = taskService.getTaskById(taskId);
+        return taskGroupRepository.findByTask(task);
     }
 
     public List<TaskGroup> getTaskByGroup(int groupId) {
-        if (isValidGroup(groupId)) {
-            Group group = getGroupById(groupId);
-            return taskGroupRepository.findByGroup(group);
-        }else{
+        if (!isValidGroup(groupId)) {
             return new ArrayList<>();
         }
+        Group group = getGroupById(groupId);
+        return taskGroupRepository.findByGroup(group);
     }
 
 

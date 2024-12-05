@@ -5,10 +5,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.taskflow.model.Group;
-import org.taskflow.model.Permission;
-import org.taskflow.model.Task;
-import org.taskflow.model.TaskGroup;
+import org.taskflow.model.*;
 import org.taskflow.repository.GroupRepository;
 import org.taskflow.repository.TaskGroupRepository;
 import org.taskflow.repository.TaskRepository;
@@ -48,8 +45,9 @@ public class TaskGroupService {
                 if(group == null) {
                     throw new Exception("Group not found");
                 }
-
+                TaskGroupKey taskGroupKey = new TaskGroupKey(taskId, groupId);
                 TaskGroup taskGroup = new TaskGroup(task, group, permission);
+                taskGroup.setId(taskGroupKey);
                 taskGroupRepository.save(taskGroup);
                 ResponseEntity.status(HttpStatus.CREATED)
                         .body("Task group successfully created");
@@ -161,8 +159,7 @@ public class TaskGroupService {
                 return false;
             }
 
-            Permission groupPermission = taskGroups.getFirst().getPermission();
-            return groupPermission.includes(Permission.WRITE);
+            return permission.includes(Permission.WRITE);
         }else{
             return false;
         }

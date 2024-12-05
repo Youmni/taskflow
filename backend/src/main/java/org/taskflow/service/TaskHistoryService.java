@@ -74,18 +74,25 @@ public class TaskHistoryService {
                     task.getDueDate(),
                     task.getComment(),
                     users.getFirst(),
-                    originalTasks.getFirst()
+                    task
             );
+            int historyId = generateHistoryId(task.getTaskId());
+            TaskHistoryKey taskHistoryKey = new TaskHistoryKey(task.getTaskId(), historyId);
+            taskhistory.setId(taskHistoryKey);
+
+            System.out.println(taskhistory.getTask().getTitle());
+            System.out.println(taskhistory.getId());
+
             taskHistoryRepository.save(taskhistory);
+
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body("Task history created");
         }catch(Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("There was an error processing your request: " + e.getMessage());
+                    .body("There was an error processing your request: " + task.getTaskId());
         }
     }
 
-    // moeten nog permissions bij komen
     public ResponseEntity<String> deleteTaskHistories(int taskId, int userId) {
         if(!taskService.isDeletePermissionGranted(userId, taskId)){
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -146,6 +153,11 @@ public class TaskHistoryService {
         }
         Sort sort = Sort.by(Sort.Order.desc("createdAt"));
         return taskHistoryRepository.findByTask(tasks.getFirst(),sort);
+    }
+
+    public int generateHistoryId(int taskId){
+        List<Taskhistory> taskhistories = getTaskHistories(taskId);
+        return taskhistories.size()+1;
     }
 
 }
