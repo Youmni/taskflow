@@ -6,11 +6,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.taskflow.model.*;
-import org.taskflow.repository.GroupRepository;
-import org.taskflow.repository.TaskGroupRepository;
-import org.taskflow.repository.TaskRepository;
+import org.taskflow.repository.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @Service
@@ -19,6 +18,7 @@ public class TaskGroupService {
     private TaskGroupRepository taskGroupRepository;
     private GroupService groupService;
     private TaskService taskService;
+    private UserGroupRepository userGroupRepository;
 
     @Autowired
     public void setTaskGroupRepository(TaskGroupRepository taskGroupRepository) {
@@ -34,6 +34,11 @@ public class TaskGroupService {
     @Lazy
     public void setTaskService(TaskService taskService) {
         this.taskService = taskService;
+    }
+
+    @Autowired
+    public void setUserGroupRepository(UserGroupRepository userGroupRepository) {
+        this.userGroupRepository = userGroupRepository;
     }
 
     public void createTaskGroup(int taskId, int groupId, Permission permission) {
@@ -163,5 +168,26 @@ public class TaskGroupService {
         }else{
             return false;
         }
+    }
+
+    public HashMap<String, Permission> getEmailsAndPermissionsByTaskId(int taskId) {
+        if(!taskService.isValidTask(taskId)) {
+            throw new RuntimeException("taskId is not valid");
+        }
+
+        Task task = taskService.getTaskById(taskId);
+        List<TaskGroup> taskGroups = taskGroupRepository.findByTask(task);
+        System.out.println(taskGroups.size());
+        HashMap<String, Permission> emailsAndPermissions = new HashMap<>();
+
+        for(TaskGroup taskGroup : taskGroups){
+            System.out.println("in loop yooo");
+            List<UserGroup> userGroupList = userGroupRepository.findByGroup(taskGroup.getGroup());
+            for(UserGroup userGroupUser : userGroupList){
+                emailsAndPermissions.put(userGroupUser.getUser().getEmail(), taskGroup.getPermission());
+            }
+        }
+
+        return emailsAndPermissions;
     }
 }

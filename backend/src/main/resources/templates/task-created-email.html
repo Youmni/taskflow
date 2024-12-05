@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Task Created</title>
+</head>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+        color: #333;
+    }
+    .container {
+        width: 80%;
+        margin: 30px auto;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+        color: #4CAF50;
+        text-align: center;
+    }
+    p {
+        font-size: 16px;
+        line-height: 1.6;
+    }
+    ul {
+        padding-left: 20px;
+    }
+    li {
+        font-size: 14px;
+        line-height: 1.6;
+    }
+    strong {
+        color: #333;
+    }
+
+    .footer {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 14px;
+        color: #777;
+    }
+    .permissions-list {
+        background-color: #f9f9f9;
+        padding: 10px;
+        border-radius: 5px;
+        margin-top: 20px;
+    }
+    .permissions-list li {
+        padding: 5px 0;
+    }
+    .permissions-list li strong {
+        color: #4CAF50;
+    }
+</style>
+<body>
+    <div class="container">
+        <h1>New Task Created</h1>
+        <p>A new task has been created</p>
+        <ul>
+            <li><strong>Creator's Email:</strong> <span th:text="${creator}">[Email]</span></li>
+            <li><strong>Title:</strong> <span th:text="${title}">[Title] </span></li>
+            <li><strong>Deadline:</strong> <span th:text="${dueDate}">[Deadline]</span></li>
+            <li><strong>Description:</strong> <span th:text="${description}">[Description]</span></li>
+        </ul>
+        <p><strong>Detail</strong>: you have <span th:text="${permission}">[Permission]</span> permission for this task</p>
+        <div class="permissions-list">
+        <br>
+        <p>Information about permissions:</p>
+        <ul>
+            <li><strong>Read:</strong> you can only read a task that is shared with you</li>
+            <li><strong>Write:</strong> you can read and write on a task that is shared with you</li>
+            <li><strong>Delete:</strong> you can read, write and delete a task that is shared with you</li>
+        </ul>
+        </div>
+        <p>For any further details, the creator should be contacted</p>
+        <div class="footer">
+            <p>&copy; 2024 TaskFlow. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
