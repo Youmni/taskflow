@@ -1,5 +1,7 @@
 package org.taskflow.wrapper;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import org.taskflow.model.Group;
 
 import java.util.List;
@@ -7,11 +9,11 @@ import java.util.List;
 public class UserGroupRequest {
 
     private Group group;
-    private List<Integer> users;
+    private List<String> emails;
 
-    public UserGroupRequest(Group group, List<Integer> users) {
+    public UserGroupRequest(Group group, List<String> emails) {
         this.group = group;
-        this.users = users;
+        this.emails = emails;
     }
 
     public Group getGroup() {
@@ -22,11 +24,11 @@ public class UserGroupRequest {
         this.group = group;
     }
 
-    public List<Integer> getUsers() {
-        return users;
+    public List<String> getEmails() {
+        return emails;
     }
 
-    public void setUsers(List<Integer> users) {
-        this.users = users;
+    public void setEmails(List<String> emails) {
+        this.emails = emails;
     }
 }

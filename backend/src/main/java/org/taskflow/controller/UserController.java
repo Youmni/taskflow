@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.taskflow.DTO.AuthDTO;
+import org.taskflow.DTO.UserDTO;
 import org.taskflow.model.User;
 import org.taskflow.service.UserService;
 
@@ -20,7 +21,7 @@ public class UserController {
     }
     @CrossOrigin
     @PostMapping(value = "/create")
-    public ResponseEntity<String> addUser(@Valid @RequestBody User user){
+    public ResponseEntity<String> addUser(@Valid @RequestBody UserDTO user){
         return userService.createUser(user);
     }
 
