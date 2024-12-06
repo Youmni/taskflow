@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.taskflow.DTO.AuthDTO;
+import org.taskflow.DTO.UserDTO;
 import org.taskflow.config.JwtService;
 import org.taskflow.model.User;
 import org.taskflow.repository.UserRepository;
@@ -33,13 +34,14 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public ResponseEntity<String> createUser(User user) {
+    public ResponseEntity<String> createUser(UserDTO userDTO) {
         try{
-            if(userRepository.existsByUserId(user.getUserId())){
+            if(userRepository.existsByEmail(userDTO.getEmail())){
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body("User already exist");
             }
-            user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+
+            User user = new User(userDTO.getUsername(), userDTO.getEmail(), bCryptPasswordEncoder.encode(userDTO.getPassword()));
             userRepository.save(user);
             return ResponseEntity.status(HttpStatus.CREATED).body("User successfully added");
         }catch(Exception e){
@@ -54,7 +56,7 @@ public class UserService {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
         }
         String token = jwtService.generateToken(userOpt.get().getUserId());
-        return ResponseEntity.ok(token);
+        return ResponseEntity.status(HttpStatus.OK).body(token);
     }
 
 
@@ -144,6 +146,9 @@ public class UserService {
     private boolean isValidEmail(String email) {
         String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
         return Pattern.compile(emailRegex).matcher(email).matches();
+    }
+    public boolean isValidUser(String email){
+        return userRepository.existsByEmail(email);
     }
 
     public boolean isValidUser(int userId){

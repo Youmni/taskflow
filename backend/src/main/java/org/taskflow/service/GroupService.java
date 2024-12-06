@@ -58,16 +58,17 @@ public class GroupService {
         this.taskGroupRepository = taskGroupRepository;
     }
 
-    public ResponseEntity<String> createGroupWithUsers(Group group, List<Integer> usersIds, int ownerId) {
+    public ResponseEntity<String> createGroupWithUsers(Group group, List<String> emails, int ownerId) {
         try {
             groupRepository.save(group);
 
-            if (!usersIds.contains(ownerId)) {
-                usersIds.add(ownerId);
+            User owner = userService.getUserById(ownerId);
+            if (!emails.contains(owner.getEmail())) {
+                emails.add(owner.getEmail());
             }
 
-            usersIds.stream()
-                    .map(userService::getUserById)
+            emails.stream()
+                    .map(userService::getUserByEmail)
                     .filter(Objects::nonNull)
                     .forEach(user ->
                             userGroupService.addUserGroup(group.getGroupId(), user.getUserId())
@@ -91,22 +92,22 @@ public class GroupService {
     }
 
 
-    public ResponseEntity<String> addUserToGroup(int groupId, int userId) {
+    public ResponseEntity<String> addUserToGroup(int groupId, String email) {
         try {
-            if (!userService.isValidUser(userId) || !isValidGroup(groupId)) {
+            if (!userService.isValidUser(email) || !isValidGroup(groupId)) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                             .body("Invalid user ID or Group ID");
             }
 
-            if (userGroupService.isUserInGroup(groupId, userId)) {
+            if (userGroupService.isUserInGroup(groupId, email)) {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
                         .body("User is already in group");
             }
 
-            User user = userService.getUserById(userId);
+            User user = userService.getUserByEmail(email);
             Group group = getGroupById(groupId);
             UserGroup userGroup = new UserGroup(user, group);
-            UserGroupKey userGroupKey = new UserGroupKey(userId, groupId);
+            UserGroupKey userGroupKey = new UserGroupKey(user.getUserId(), groupId);
             userGroup.setId(userGroupKey);
             userGroupRepository.save(userGroup);
 

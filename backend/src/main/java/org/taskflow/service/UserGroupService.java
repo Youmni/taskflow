@@ -71,4 +71,21 @@ public class UserGroupService {
         List<UserGroup> userGroups = userGroupRepository.findByUserAndGroup(user, group);
         return !userGroups.isEmpty();
     }
+
+    public boolean isUserInGroup(int groupId, String email) throws Exception{
+        if (!userService.isValidUser(email)) {
+            throw new Exception("Invalid user");
+        }
+        if (!groupService.isValidGroup(groupId)) {
+            throw new Exception("Invalid group");
+        }
+        User user = userService.getUserByEmail(email);
+        Group group = groupService.getGroupById(groupId);
+
+        if (user== null || group == null) {
+            throw new Exception("User or Group not found");
+        }
+        List<UserGroup> userGroups = userGroupRepository.findByUserAndGroup(user, group);
+        return !userGroups.isEmpty();
+    }
 }

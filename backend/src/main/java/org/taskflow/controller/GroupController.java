@@ -2,6 +2,7 @@ package org.taskflow.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.taskflow.DTO.GroupWithUsersDTO;
 import org.taskflow.model.Group;
 import org.taskflow.model.UserGroup;
 import org.taskflow.service.GroupService;
@@ -21,11 +22,10 @@ public class GroupController {
 
     @CrossOrigin
     @PostMapping(value = "/createWithUsers/{ownerId}")
-    public ResponseEntity<String> createGroupWithUsers(@RequestBody UserGroupRequest userGroupRequest, @PathVariable int ownerId) {
-        Group group = userGroupRequest.getGroup();
-        List<Integer> users = userGroupRequest.getUsers();
+    public ResponseEntity<String> createGroupWithUsers(@RequestBody GroupWithUsersDTO groupDTO, @PathVariable int ownerId) {
+        Group group = new Group(groupDTO.getGroupName(), groupDTO.getDescription());
 
-        return groupService.createGroupWithUsers(group, users, ownerId);
+        return groupService.createGroupWithUsers(group, groupDTO.getEmails(), ownerId);
     }
 
     @CrossOrigin
@@ -37,8 +37,8 @@ public class GroupController {
 
     @CrossOrigin
     @PutMapping(value = "/add")
-    public ResponseEntity<String> addUserToGroup(@RequestParam int groupId, @RequestParam int userId) {
-        return groupService.addUserToGroup(groupId, userId);
+    public ResponseEntity<String> addUserToGroup(@RequestParam int groupId, @RequestParam String email) {
+        return groupService.addUserToGroup(groupId, email);
     }
 
     @CrossOrigin
