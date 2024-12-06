@@ -17,7 +17,6 @@ public class UserGroup {
     @MapsId("userId")
     @JoinColumn(name = "user_id")
     @NotNull(message = "User is required")
-    @JsonBackReference
     private User user;
 
     @ManyToOne
