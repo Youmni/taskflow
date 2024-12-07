@@ -10,7 +10,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Scanner;
 
-@CommandLine.Command(name = "registration", description = "Register a new user for the system")
+@CommandLine.Command(name = "registration", description = "Register a new user for the system", mixinStandardHelpOptions = true)
 public class RegistrationCommand implements Runnable {
 
     @CommandLine.Option(names = {"-u", "--username"}, description = "Provide a username")

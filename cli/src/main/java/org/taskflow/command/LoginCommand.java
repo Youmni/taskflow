@@ -1,9 +1,11 @@
 package org.taskflow.command;
 
 import org.taskflow.AuthSession;
+import org.taskflow.service.TokenService;
 import picocli.CommandLine;
 
 import java.io.Console;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -11,7 +13,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Scanner;
 
-@CommandLine.Command(name = "login", description = "Login to use the taskflow service!")
+@CommandLine.Command(name = "login", description = "Login to use the taskflow service!", mixinStandardHelpOptions = true)
 public class LoginCommand implements Runnable {
 
     @CommandLine.Option(names = {"-u", "--username"}, description = "Provide a username")
@@ -26,8 +28,8 @@ public class LoginCommand implements Runnable {
 
         try {
 
-            username = getInput("Username: ", username);
-            password = getInput("Password: ", password);
+            username = getInput("Username: ", username, "username");
+            password = getInput("Password: ", password, "password");
 
             String jsonPayload = String.format("{\"username\": \"%s\", \"password\": \"%s\"}", username, password);
 
@@ -48,14 +50,14 @@ public class LoginCommand implements Runnable {
         }
     }
 
-    private String getInput(String prompt, String value){
+    private String getInput(String prompt, String value, String type){
         if(value == null){
             Console console = System.console();
-            if(console != null){
-                return console.readLine(prompt);
+            if(type.equals("password")){
+                char[] passwordArray = console.readPassword(prompt);
+                value =  new String(passwordArray);
             }else{
-                Scanner scanner = new Scanner(System.in);
-                return scanner.nextLine();
+                value = console.readLine(prompt);
             }
         }
         return value;
@@ -64,6 +66,7 @@ public class LoginCommand implements Runnable {
     private void handleResponse(HttpResponse<String> response){
         if(response.statusCode() == 200){
             System.out.println("Login successful!");
+            TokenService.saveTokenToFile(response.body());
         }else{
             System.out.println(response.body());
         }
