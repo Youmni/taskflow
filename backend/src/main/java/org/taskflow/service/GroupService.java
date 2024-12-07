@@ -1,20 +1,21 @@
 package org.taskflow.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.taskflow.DTO.GroupDTO;
+import org.taskflow.DTO.GroupRequestDTO;
 import org.taskflow.model.*;
 import org.taskflow.repository.GroupRepository;
 import org.taskflow.repository.TaskGroupRepository;
 import org.taskflow.repository.UserGroupRepository;
+import org.taskflow.wrapper.UserGroupRequest;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class GroupService {
@@ -81,8 +82,14 @@ public class GroupService {
         }
     }
 
-    public ResponseEntity<String> createGroup(Group group) {
+    public ResponseEntity<String> createGroup(GroupDTO groupDTO, int ownerId) {
         try {
+            if(!userService.isValidUser(ownerId)){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("There was an incorrect owner id");
+            }
+            User owner = userService.getUserById(ownerId);
+            Group group = new Group(groupDTO.getGroupName(), groupDTO.getDescription(), owner);
             groupRepository.save(group);
             return ResponseEntity.ok("Group created successfully");
         }catch (Exception e) {
@@ -92,7 +99,29 @@ public class GroupService {
     }
 
 
-    public ResponseEntity<String> addUserToGroup(int groupId, String email) {
+    public ResponseEntity<String> deleteGroup(int groupId, int ownerId) {
+
+        if(!isUserOwnerOfGroup(ownerId, groupId)){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid Group ID");
+        }
+
+        if(!isValidGroup(groupId)){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid Group ID");
+        }
+        Group group = getGroupById(groupId);
+
+        List<UserGroup> userGroups = userGroupRepository.findByGroup(group);
+        List<TaskGroup> taskGroups = taskGroupRepository.findByGroup(group);
+
+        userGroupRepository.deleteAll(userGroups);
+        taskGroupRepository.deleteAll(taskGroups);
+
+        groupRepository.deleteById(groupId);
+        return ResponseEntity.ok("Group successfully deleted");
+    }
+
+
+    public ResponseEntity<String> addUserToGroup(int groupId, String email, int ownerId) {
         try {
             if (!userService.isValidUser(email) || !isValidGroup(groupId)) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -102,6 +131,11 @@ public class GroupService {
             if (userGroupService.isUserInGroup(groupId, email)) {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
                         .body("User is already in group");
+            }
+
+            if(!isUserOwnerOfGroup(ownerId, groupId)){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("User is not owner of group");
             }
 
             User user = userService.getUserByEmail(email);
@@ -118,19 +152,56 @@ public class GroupService {
         }
     }
 
-    public ResponseEntity<String> removeUserFromGroup(int groupId, int userId) {
+    public ResponseEntity<String> addUsersToGroup(int groupId, List<String> emails, int ownerId) {
+        try{
+            if (!isValidGroup(groupId)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Invalid Group ID");
+            }
+
+            List<String> successes = new ArrayList<>();
+            List<String> failures = new ArrayList<>();
+
+            for(String email: emails){
+                ResponseEntity<String> response = addUserToGroup(groupId, email, ownerId);
+                if(response.getStatusCode() == HttpStatus.OK){
+                    successes.add(email+": "+response.getBody());
+                }else{
+                    failures.add(email+": "+response.getBody());
+                }
+            }
+            Map<String, Object> result = new HashMap<>();
+            result.put("Successes",successes);
+            result.put("Failures",failures);
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            String jsonResponse = objectMapper.writeValueAsString(result);
+
+            return ResponseEntity.ok(jsonResponse);
+        }catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("There was an error processing your request: " + e.getMessage());
+        }
+    }
+
+
+    public ResponseEntity<String> removeUserFromGroup(int groupId, String email, int ownerId) {
         try {
-            if (!userService.isValidUser(userId) && !isValidGroup(groupId)) {
+            if (!userService.isValidUser(email) && !isValidGroup(groupId)) {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
                         .body("Invalid user ID or Group ID");
             }
 
-            if (!userGroupService.isUserInGroup(groupId, userId)) {
+            if (!userGroupService.isUserInGroup(groupId, email)) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body("User not in group");
             }
 
-            User user = userService.getUserById(userId);
+            if(!isUserOwnerOfGroup(ownerId, groupId)){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("User is not owner of group");
+            }
+
+            User user = userService.getUserByEmail(email);
             Group group = getGroupById(groupId);
 
             userGroupRepository.findByUserAndGroup(user, group)
@@ -148,12 +219,61 @@ public class GroupService {
         }
     }
 
-    public List<UserGroup> getGroupsByUserId(int userId) {
+    public ResponseEntity<String> removeUsersFromGroup(int groupId, List<String> emails, int ownerId) {
+        try{
+            if (!isValidGroup(groupId)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Invalid Group ID");
+            }
+
+            List<String> successes = new ArrayList<>();
+            List<String> failures = new ArrayList<>();
+
+            for(String email: emails){
+                ResponseEntity<String> response = removeUserFromGroup(groupId, email, ownerId);
+                if(response.getStatusCode() == HttpStatus.OK){
+                    successes.add(email+": "+response.getBody());
+                }else{
+                    failures.add(email+": "+response.getBody());
+                }
+            }
+
+            Map<String, Object> result = new HashMap<>();
+            result.put("Successes",successes);
+            result.put("Failures",failures);
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            String jsonResponse = objectMapper.writeValueAsString(result);
+
+            return ResponseEntity.ok(jsonResponse);
+
+        }catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("There was an error processing your request: " + e.getMessage());
+        }
+    }
+
+
+    public List<GroupRequestDTO> getGroupsByUserId(int userId) {
         if (!userService.isValidUser(userId)) {
+            System.out.println("user is not valid");
             return new ArrayList<>();
         }
         User user = userService.getUserById(userId);
-        return userGroupRepository.findByUser(user, Sort.by(Sort.Direction.ASC, "createdAt"));
+        List<Group> groupList = groupRepository.findByCreatedBy(user, Sort.by(Sort.Direction.ASC, "createdAt"));
+        List<GroupRequestDTO> groupRequestDTOList = new ArrayList<>();
+
+        for(Group group : groupList) {
+            GroupRequestDTO groupRequestDTO = new GroupRequestDTO();
+            groupRequestDTO.setGroupId(group.getGroupId());
+            groupRequestDTO.setGroupName(group.getGroupName());
+            groupRequestDTO.setDescription(group.getDescription());
+
+            List<String> emails = userGroupService.getEmailsByGroupId(group.getGroupId());
+            groupRequestDTO.setEmails(emails);
+
+            groupRequestDTOList.add(groupRequestDTO);
+        }
+        return groupRequestDTOList;
     }
 
     public TaskGroup getGroupByUserIdAndTaskId(int userId, int taskId) {
@@ -220,5 +340,13 @@ public class GroupService {
     public boolean isValidGroup(int groupId){
         List<Group> groups = groupRepository.findByGroupId(groupId);
         return !groups.isEmpty();
+    }
+
+    public boolean isUserOwnerOfGroup(int ownerId, int groupId) {
+        if(!isValidGroup(groupId)) {
+            return false;
+        }
+        Group group = getGroupById(groupId);
+        return group.getCreatedBy().getUserId() == ownerId;
     }
 }

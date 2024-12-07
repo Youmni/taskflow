@@ -1,5 +1,6 @@
 package org.taskflow.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -38,6 +39,10 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<UserGroup> userGroups;
+
+    @OneToMany(mappedBy = "createdBy")
+    @JsonBackReference
+    private Set<Group> groups;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -101,6 +106,14 @@ public class User {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Set<Group> getGroups() {
+        return groups;
+    }
+
+    public void setGroups(Set<Group> groups) {
+        this.groups = groups;
     }
 
     public LocalDateTime getUpdatedAt() {

@@ -29,7 +29,13 @@ public class Group {
     @Column(name = "description")
     private String description;
 
+    @ManyToOne
+    @JoinColumn(name = "created_by", nullable = false)
+    @JsonBackReference
+    private User createdBy;
+
     @OneToMany(mappedBy = "group")
+    @JsonManagedReference
     Set<TaskGroup> taskGroups;
 
     @CreationTimestamp
@@ -42,9 +48,10 @@ public class Group {
 
     protected Group() {}
 
-    public Group(String groupName, String description) {
+    public Group(String groupName, String description, User createdBy) {
         this.groupName = groupName;
         this.description = description;
+        this.createdBy = createdBy;
     }
 
     public int getGroupId() {
@@ -77,6 +84,14 @@ public class Group {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public User getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(User createdBy) {
+        this.createdBy = createdBy;
     }
 
     public LocalDateTime getUpdatedAt() {

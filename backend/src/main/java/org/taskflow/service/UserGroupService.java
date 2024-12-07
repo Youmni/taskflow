@@ -9,6 +9,7 @@ import org.taskflow.model.UserGroup;
 import org.taskflow.model.UserGroupKey;
 import org.taskflow.repository.UserGroupRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -53,6 +54,21 @@ public class UserGroupService {
                 System.err.println(e.getMessage());
             }
         }
+    }
+
+    public List<String> getEmailsByGroupId(int groupId) {
+
+        if(!groupService.isValidGroup(groupId)) {
+            return new ArrayList<>();
+        }
+        Group group = groupService.getGroupById(groupId);
+        List<UserGroup> userGroups = userGroupRepository.findByGroup(group);
+        List<String> emails = new ArrayList<>();
+
+        for(UserGroup userGroup : userGroups) {
+            emails.add(userGroup.getUser().getEmail());
+        }
+        return emails;
     }
 
     public boolean isUserInGroup(int groupId, int userId) throws Exception{
