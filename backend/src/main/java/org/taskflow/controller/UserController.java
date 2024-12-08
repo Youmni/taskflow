@@ -34,13 +34,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
-
-    @CrossOrigin
-    @DeleteMapping(value = "/delete")
-    public ResponseEntity<String> deleteUser( @RequestParam int userId){
-        return userService.deleteUser(userId);
-    }
-
+    
     @CrossOrigin
     @PutMapping(value = "/updateUsername")
     public ResponseEntity<String> updateUsername(@RequestParam int userId, @RequestParam String username){
@@ -61,8 +55,8 @@ public class UserController {
 
     @CrossOrigin
     @GetMapping(value = "/{userId}")
-    public User getUserbyUserId(@PathVariable int userId){
-        return userService.getUserById(userId);
+    public String getUserbyUserId(@PathVariable int userId){
+        return userService.getUserById(userId).getUsername();
     }
 
     @CrossOrigin
@@ -76,7 +70,4 @@ public class UserController {
     public User getUserbyEmail(@PathVariable String email){
         return userService.getUserByEmail(email);
     }
-
-
-
 }

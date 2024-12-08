@@ -7,15 +7,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.taskflow.model.Task;
-import org.taskflow.model.TaskHistoryKey;
-import org.taskflow.model.Taskhistory;
-import org.taskflow.model.User;
+import org.taskflow.DTO.TaskHistoryDTO;
+import org.taskflow.model.*;
+import org.taskflow.repository.TaskGroupRepository;
 import org.taskflow.repository.TaskHistoryRepository;
 import org.taskflow.repository.TaskRepository;
 import org.taskflow.repository.UserRepository;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @Service
@@ -25,6 +25,7 @@ public class TaskHistoryService {
     private TaskService taskService;
     private UserRepository userRepository;
     private TaskHistoryRepository taskHistoryRepository;
+    private TaskGroupRepository taskGroupRepository;
 
     @Autowired
     public void setTaskRepository(TaskRepository taskRepository) {
@@ -143,18 +144,53 @@ public class TaskHistoryService {
         return taskHistoryRepository.findById(taskHistoryKey);
     }
 
-    public List<Taskhistory> getTaskHistories(int taskId) {
+    public List<TaskHistoryDTO> getTaskHistories(int taskId, int ownerId) {
         List<Task> tasks = taskRepository.findByTaskId(taskId);
-        if(tasks.isEmpty()){
+        if(tasks.isEmpty() || !taskService.isValidTask(taskId)){
             return new ArrayList<>();
         }
-        Sort sort = Sort.by(Sort.Order.desc("createdAt"));
-        return taskHistoryRepository.findByTask(tasks.getFirst(),sort);
+
+        Task task = tasks.getFirst();
+        if(!(task.getUser().getUserId()==ownerId)){
+            return new ArrayList<>();
+        }
+
+
+        List<TaskHistoryDTO> taskHistoryList = new ArrayList<>();
+        List<Taskhistory> taskhistories = taskHistoryRepository.findByTask(task,Sort.by(Sort.Order.asc("createdAt")));
+
+        for(Taskhistory taskhistory : taskhistories){
+            TaskHistoryDTO taskHistoryDTO = new TaskHistoryDTO();
+            taskHistoryDTO.setTaskId(taskhistory.getTask().getTaskId());
+            taskHistoryDTO.setHistoryId(taskhistory.getId().getHistoryId());
+            taskHistoryDTO.setTitle(taskhistory.getTitle());
+            taskHistoryDTO.setDescription(taskhistory.getDescription());
+            taskHistoryDTO.setStatus(taskhistory.getStatus());
+            taskHistoryDTO.setPriority(taskhistory.getPriority());
+            taskHistoryDTO.setDueDate(taskhistory.getDueDate());
+            taskHistoryDTO.setComment(taskhistory.getComment());
+            taskHistoryDTO.setUserId(taskhistory.getUser().getUserId());
+
+            HashMap<Integer, Permission> groups = new HashMap<>();
+
+            List<TaskGroup> taskGroups = taskGroupRepository.findByTask(taskhistory.getTask());
+            for(TaskGroup taskGroup : taskGroups){
+                groups.put(taskGroup.getGroup().getGroupId(), taskGroup.getPermission());
+            }
+            taskHistoryDTO.setGroups(groups);
+            taskHistoryList.add(taskHistoryDTO);
+        }
+        return taskHistoryList;
     }
 
     public int generateHistoryId(int taskId){
-        List<Taskhistory> taskhistories = getTaskHistories(taskId);
+        Task task = taskService.getTaskById(taskId);
+        List<Taskhistory> taskhistories = taskHistoryRepository.findByTask(task);
         return taskhistories.size()+1;
     }
 
+    @Autowired
+    public void setTaskGroupRepository(TaskGroupRepository taskGroupRepository) {
+        this.taskGroupRepository = taskGroupRepository;
+    }
 }

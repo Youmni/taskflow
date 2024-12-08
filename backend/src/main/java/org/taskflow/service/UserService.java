@@ -51,12 +51,16 @@ public class UserService {
     }
 
     public ResponseEntity<String> authenticateUser(AuthDTO authDTO) throws JOSEException {
-        Optional<User> userOpt = userRepository.findByUsername(authDTO.getUsername()).stream().findFirst();
-        if (userOpt.isEmpty() || !bCryptPasswordEncoder.matches(authDTO.getPassword(), userOpt.get().getPassword())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+        try {
+            Optional<User> userOpt = userRepository.findByUsername(authDTO.getUsername()).stream().findFirst();
+            if (userOpt.isEmpty() || !bCryptPasswordEncoder.matches(authDTO.getPassword(), userOpt.get().getPassword())) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+            }
+            String token = jwtService.generateToken(userOpt.get().getUserId());
+            return ResponseEntity.status(HttpStatus.OK).body(token);
+        }catch (JOSEException e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error has occurred during authentication");
         }
-        String token = jwtService.generateToken(userOpt.get().getUserId());
-        return ResponseEntity.status(HttpStatus.OK).body(token);
     }
 
 

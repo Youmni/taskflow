@@ -1,6 +1,7 @@
 package org.taskflow.controller;
 
 import org.springframework.web.bind.annotation.*;
+import org.taskflow.DTO.TaskHistoryDTO;
 import org.taskflow.model.Taskhistory;
 import org.taskflow.service.TaskHistoryService;
 import org.taskflow.service.UserService;
@@ -18,8 +19,8 @@ public class TaskHistoryController {
     }
 
     @CrossOrigin
-    @GetMapping(value = "/get/{taskId}")
-    public List<Taskhistory> getTaskHistories(@PathVariable int taskId) {
-        return taskHistoryService.getTaskHistories(taskId);
+    @GetMapping(value = "/{taskId}/ID")
+    public List<TaskHistoryDTO> getTaskHistories(@PathVariable int taskId, @RequestParam int userId) {
+        return taskHistoryService.getTaskHistories(taskId, userId);
     }
 }
