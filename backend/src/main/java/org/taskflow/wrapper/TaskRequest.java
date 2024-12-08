@@ -12,33 +12,26 @@ import java.time.LocalDate;
 
 public class TaskRequest {
 
-
-    private int taskId;
     private String title;
     private String description;
     private Status status;
     private Priority priority;
-    private LocalDate dueDate;
+    private int day;
+    private int month;
+    private int year;
     private String comment;
     private int userId;
 
-    public TaskRequest(int taskId, String title, String description, Status status, LocalDate dueDate, Priority priority, String comment, int userId) {
-        this.taskId = taskId;
+    public TaskRequest(String title, int userId, String comment, int year, int day, Priority priority, Status status, String description, int month) {
         this.title = title;
-        this.description = description;
-        this.status = status;
-        this.dueDate = dueDate;
-        this.priority = priority;
-        this.comment = comment;
         this.userId = userId;
-    }
-
-    public int getTaskId() {
-        return taskId;
-    }
-
-    public void setTaskId(int taskId) {
-        this.taskId = taskId;
+        this.comment = comment;
+        this.year = year;
+        this.day = day;
+        this.priority = priority;
+        this.status = status;
+        this.description = description;
+        this.month = month;
     }
 
     public String getTitle() {
@@ -65,6 +58,14 @@ public class TaskRequest {
         this.status = status;
     }
 
+    public int getDay() {
+        return day;
+    }
+
+    public void setDay(int day) {
+        this.day = day;
+    }
+
     public Priority getPriority() {
         return priority;
     }
@@ -73,12 +74,20 @@ public class TaskRequest {
         this.priority = priority;
     }
 
-    public LocalDate getDueDate() {
-        return dueDate;
+    public int getMonth() {
+        return month;
     }
 
-    public void setDueDate(LocalDate dueDate) {
-        this.dueDate = dueDate;
+    public void setMonth(int month) {
+        this.month = month;
+    }
+
+    public int getYear() {
+        return year;
+    }
+
+    public void setYear(int year) {
+        this.year = year;
     }
 
     public String getComment() {

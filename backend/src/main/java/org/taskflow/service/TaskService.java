@@ -8,8 +8,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.taskflow.DTO.TaskDTO;
 import org.taskflow.model.*;
 import org.taskflow.repository.TaskGroupRepository;
+import org.taskflow.repository.TaskHistoryRepository;
 import org.taskflow.repository.TaskRepository;
 import org.taskflow.repository.UserGroupRepository;
 import org.taskflow.wrapper.TaskCreationRequest;
@@ -21,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class TaskService {
@@ -44,6 +47,8 @@ public class TaskService {
     private TaskGroupRepository taskGroupRepository;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private TaskHistoryRepository taskHistoryRepository;
 
     @Autowired
     public void setUserDataService(UserService userService) {
@@ -78,12 +83,14 @@ public class TaskService {
             TaskRequest taskRequest = taskCreationRequest.getTaskRequest();
             HashMap<Integer, Permission> groups = taskCreationRequest.getGroup();
 
+            LocalDate dueDate = LocalDate.of(taskRequest.getYear(), taskRequest.getMonth(), taskRequest.getDay());
+
             Task task = new Task(
                     taskRequest.getTitle(),
                     taskRequest.getDescription(),
                     taskRequest.getStatus(),
                     taskRequest.getPriority(),
-                    taskRequest.getDueDate(),
+                    dueDate,
                     taskRequest.getComment(),
                     null
             );
@@ -120,31 +127,58 @@ public class TaskService {
         }
     }
 
-    public ResponseEntity<String> updateTask(int taskId, Task task, int userIdMakingChanges) {
-
+    public ResponseEntity<String> updateTask(int taskId, int userIdMakingChanges, String title, String description, Status status,Priority priority,LocalDate dueDate, String comment){
+        System.out.println("1");
         if (!taskRepository.existsByTaskId(taskId)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Task not found");
         }
+        System.out.println("2");
 
         if(!isWritePermissionGranted(userIdMakingChanges, taskId)){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You do not have permission to update this task");
         }
+        System.out.println("3");
 
         try {
-            List<Task> tasks = taskRepository.findByTaskId(taskId);
+            Task taskToUpdate = taskRepository.findByTaskId(taskId).getFirst();
+            boolean isTaskChanged = false;
+            System.out.println("5");
 
+            if(title != null && !title.equals(taskToUpdate.getTitle())){
+                taskToUpdate.setTitle(title);
+                isTaskChanged = true;
+            }
+            if(description != null && !description.equals(taskToUpdate.getDescription())){
+                taskToUpdate.setDescription(description);
+                isTaskChanged = true;
+            }
+            if(status != null && !status.equals(taskToUpdate.getStatus())) {
+                taskToUpdate.setStatus(status);
+                isTaskChanged = true;
+            }
+            if(priority != null && !priority.equals(taskToUpdate.getPriority())) {
+                taskToUpdate.setPriority(priority);
+                isTaskChanged = true;
+            }
+            if(dueDate != null && !dueDate.equals(taskToUpdate.getDueDate())) {
+                taskToUpdate.setDueDate(dueDate);
+                isTaskChanged = true;
+            }
+            if(comment != null && !comment.equals(taskToUpdate.getComment())) {
+                taskToUpdate.setComment(comment);
+                isTaskChanged = true;
+            }
+            System.out.println("6");
 
-            Task taskToUpdate = tasks.getFirst();
+            if(isTaskChanged) {
+                System.out.println("7");
 
-            taskToUpdate.setTitle(task.getTitle());
-            taskToUpdate.setDescription(task.getDescription());
-            taskToUpdate.setStatus(task.getStatus());
-            taskToUpdate.setPriority(task.getPriority());
-            taskToUpdate.setDueDate(task.getDueDate());
-            taskToUpdate.setComment(task.getComment());
-            taskRepository.save(taskToUpdate);
-
-            return taskHistoryService.createTaskHistory(taskToUpdate, userIdMakingChanges);
+                taskRepository.save(taskToUpdate);
+                taskHistoryService.createTaskHistory(taskToUpdate, userIdMakingChanges);
+                return ResponseEntity.status(HttpStatus.OK).body("Task updated successfully");
+            }else{
+                return ResponseEntity.status(HttpStatus.OK).body("No changes detected");
+            }
         }catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ERROR_MESSAGE + e.getMessage());
         }
@@ -153,14 +187,21 @@ public class TaskService {
 
 
     public ResponseEntity<String> deleteTask(int taskId, int userId) {
-        //check if user can delete
         if(!isDeletePermissionGranted(userId, taskId)){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You do not have permission to delete this task");
         }
-        if (taskRepository.existsByTaskId(taskId)) {
+        if (!taskRepository.existsByTaskId(taskId)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Task not found");
         }
         try{
+            Task taskToDelete = getTaskById(taskId);
+
+            List<Taskhistory> taskhistories = taskHistoryRepository.findByTask(taskToDelete);
+            List<TaskGroup> taskGroups = taskGroupRepository.findByTask(taskToDelete);
+
+            taskHistoryRepository.deleteAll(taskhistories);
+            taskGroupRepository.deleteAll(taskGroups);
+
             taskRepository.deleteById(taskId);
             return ResponseEntity.ok("Task deleted successfully");
         }catch (Exception e) {
@@ -168,8 +209,131 @@ public class TaskService {
         }
     }
 
-    public List<Task> getAllTasks() {
-        return taskRepository.findAll();
+    public List<TaskDTO> getFilteredTasks(int userId,LocalDate dueDate,LocalDate dueDateAfter,LocalDate dueDateBefore, Priority priority, Status status){
+
+        if(!userService.isValidUser(userId)){
+           return new ArrayList<>();
+        }
+        User user = userService.getUserById(userId);
+        List<Task> taskList = taskRepository.findByUser(user, Sort.by(Sort.Direction.DESC, "dueDate"));
+
+        if(dueDate != null){
+            taskList = taskList.stream()
+                    .filter(task -> task.getDueDate().equals(dueDate))
+                    .toList();
+        }
+
+        if(dueDateAfter != null){
+            taskList = taskList.stream()
+                    .filter(task -> task.getDueDate().isAfter(dueDateAfter))
+                    .toList();
+        }
+
+        if(dueDateBefore != null){
+            taskList = taskList.stream()
+                    .filter(task -> task.getDueDate().isBefore(dueDateBefore))
+                    .toList();
+        }
+
+        if(priority != null){
+            taskList = taskList.stream()
+                    .filter(task -> task.getPriority().equals(priority))
+                    .toList();
+        }
+
+        if(status != null){
+            taskList = taskList.stream()
+                    .filter(task -> task.getStatus().equals(status))
+                    .toList();
+        }
+
+        List<TaskDTO> taskDTOList = new ArrayList<>();
+
+        for(Task task : taskList){
+            TaskDTO taskDTO = new TaskDTO();
+
+            taskDTO.setTaskId(task.getTaskId());
+            taskDTO.setTitle(task.getTitle());
+            taskDTO.setDescription(task.getDescription());
+            taskDTO.setStatus(task.getStatus());
+            taskDTO.setPriority(task.getPriority());
+            taskDTO.setDueDate(task.getDueDate());
+            taskDTO.setComment(task.getComment());
+            taskDTO.setUserId(task.getUser().getUserId());
+
+            HashMap<Integer, Permission> groups = new HashMap<>();
+
+            List<TaskGroup> taskGroups = taskGroupRepository.findByTask(task);
+            for(TaskGroup taskGroup : taskGroups){
+                groups.put(taskGroup.getGroup().getGroupId(), taskGroup.getPermission());
+            }
+            taskDTO.setGroups(groups);
+            taskDTOList.add(taskDTO);
+        }
+        return taskDTOList;
+    }
+
+    public List<TaskDTO> getFilteredSharedTasks(int userId,LocalDate dueDate,LocalDate dueDateAfter,LocalDate dueDateBefore, Priority priority, Status status){
+        if(!userService.isValidUser(userId)){
+            return new ArrayList<>();
+        }
+
+        List<Task> taskList = getAllSharedTasks(userId);
+
+        if(dueDate != null){
+            taskList = taskList.stream()
+                    .filter(task -> task.getDueDate().equals(dueDate))
+                    .toList();
+        }
+
+        if(dueDateAfter != null){
+            taskList = taskList.stream()
+                    .filter(task -> task.getDueDate().isAfter(dueDateAfter))
+                    .toList();
+        }
+
+        if(dueDateBefore != null){
+            taskList = taskList.stream()
+                    .filter(task -> task.getDueDate().isBefore(dueDateBefore))
+                    .toList();
+        }
+
+        if(priority != null){
+            taskList = taskList.stream()
+                    .filter(task -> task.getPriority().equals(priority))
+                    .toList();
+        }
+
+        if(status != null){
+            taskList = taskList.stream()
+                    .filter(task -> task.getStatus().equals(status))
+                    .toList();
+        }
+
+        List<TaskDTO> taskDTOList = new ArrayList<>();
+
+        for(Task task : taskList){
+            TaskDTO taskDTO = new TaskDTO();
+
+            taskDTO.setTaskId(task.getTaskId());
+            taskDTO.setTitle(task.getTitle());
+            taskDTO.setDescription(task.getDescription());
+            taskDTO.setStatus(task.getStatus());
+            taskDTO.setPriority(task.getPriority());
+            taskDTO.setDueDate(task.getDueDate());
+            taskDTO.setComment(task.getComment());
+            taskDTO.setUserId(task.getUser().getUserId());
+
+            HashMap<Integer, Permission> groups = new HashMap<>();
+
+            List<TaskGroup> taskGroups = taskGroupRepository.findByTask(task);
+            for(TaskGroup taskGroup : taskGroups){
+                groups.put(taskGroup.getGroup().getGroupId(), taskGroup.getPermission());
+            }
+            taskDTO.setGroups(groups);
+            taskDTOList.add(taskDTO);
+        }
+        return taskDTOList;
     }
 
     public Task getTaskById(int taskId) {
@@ -258,6 +422,25 @@ public class TaskService {
                 }
             }
         }
+        return tasks;
+    }
+
+    public List<Task> getAllSharedTasks(int userId) {
+        User user = userService.getUserById(userId);
+        List<UserGroup> userGroups = userGroupRepository.findByUser(user, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        List<Task> tasks = new ArrayList<>();
+
+        for(UserGroup userGroup : userGroups){
+            Group group = userGroup.getGroup();
+
+            List<TaskGroup> taskGroups = taskGroupRepository.findByGroup(group);
+
+            for(TaskGroup taskGroup : taskGroups){
+                Task task = taskGroup.getTask();
+                 tasks.add(task);
+                }
+            }
         return tasks;
     }
 
@@ -354,12 +537,24 @@ public class TaskService {
 
 
     public boolean isWritePermissionGranted(int userIdMakingChanges, int taskId) {
+
+        Task task = getTaskById(taskId);
+        if(task.getUser().getUserId()==userIdMakingChanges){
+            return true;
+        }
+
         TaskGroup taskGroup = groupService.getGroupByUserIdAndTaskId(userIdMakingChanges, taskId);
-        System.out.println(taskGroup.getPermission());
+        if(taskGroup == null) {
+            return false;
+        }
         return taskGroupService.isAllowedToWrite(taskGroup.getPermission(), taskId);
     }
 
     public boolean isDeletePermissionGranted(int userIdMakingChanges, int taskId) {
+        Task task = getTaskById(taskId);
+        if(task.getUser().getUserId()==userIdMakingChanges){
+            return true;
+        }
         TaskGroup taskGroup = groupService.getGroupByUserIdAndTaskId(userIdMakingChanges, taskId);
         return taskGroup != null && taskGroupService.isAllowedToDelete(taskGroup.getPermission(), taskId);
     }

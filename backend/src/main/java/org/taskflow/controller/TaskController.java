@@ -3,6 +3,7 @@ package org.taskflow.controller;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.taskflow.DTO.TaskDTO;
 import org.taskflow.model.*;
 import org.taskflow.repository.UserRepository;
 import org.taskflow.service.TaskService;
@@ -31,15 +32,49 @@ public class TaskController {
     }
 
     @CrossOrigin
-    @PutMapping(value = "/update")
-    public ResponseEntity<String> updateTask(@RequestParam int taskId, @RequestParam int userIdMakingChanges, @RequestBody Task task) {
-        return taskService.updateTask(taskId, task, userIdMakingChanges);
+    @PutMapping(value = "/{taskId}/update")
+    public ResponseEntity<String> updateTask(
+            @PathVariable int taskId,
+            @RequestParam(required = false) int userIdMakingChanges,
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) Status status,
+            @RequestParam(required = false) Priority priority,
+            @RequestParam(required = false) LocalDate dueDate,
+            @RequestParam(required = false) String comment){
+        return taskService.updateTask(taskId, userIdMakingChanges, title,description, status,priority, dueDate, comment);
     }
 
     @CrossOrigin
-    @DeleteMapping(value = "/delete")
-    public ResponseEntity<String> deleteTask(@RequestParam int taskId, @RequestParam int userId) {
+    @DeleteMapping(value = "/{taskId}/delete")
+    public ResponseEntity<String> deleteTask(@PathVariable int taskId, @RequestParam int userId) {
         return taskService.deleteTask(taskId, userId);
+    }
+
+    @CrossOrigin
+    @GetMapping(value = "/{userId}/tasks")
+    public List<TaskDTO> getFilteredTasks(
+            @PathVariable int userId,
+            @RequestParam(required = false) LocalDate dueDate,
+            @RequestParam(required = false) LocalDate dueDateAfter,
+            @RequestParam(required = false) LocalDate dueDateBefore,
+            @RequestParam(required = false) Priority priority,
+            @RequestParam(required = false) Status status)
+    {
+        return taskService.getFilteredTasks(userId, dueDate, dueDateAfter, dueDateBefore, priority, status);
+    }
+
+    @CrossOrigin
+    @GetMapping(value = "/shared/{userId}/tasks")
+    public List<TaskDTO> getFilteredSharedTasks(
+            @PathVariable int userId,
+            @RequestParam(required = false) LocalDate dueDate,
+            @RequestParam(required = false) LocalDate dueDateAfter,
+            @RequestParam(required = false) LocalDate dueDateBefore,
+            @RequestParam(required = false) Priority priority,
+            @RequestParam(required = false) Status status)
+    {
+        return taskService.getFilteredSharedTasks(userId, dueDate, dueDateAfter, dueDateBefore, priority, status);
     }
 
     @CrossOrigin
