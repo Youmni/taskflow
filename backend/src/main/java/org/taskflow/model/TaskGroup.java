@@ -17,12 +17,14 @@ public class TaskGroup {
     @MapsId("taskId")
     @JoinColumn(name = "task_id")
     @NotNull(message = "Task is required")
+    @JsonBackReference
     private Task task;
 
     @ManyToOne
     @MapsId("groupId")
     @JoinColumn(name = "group_id")
     @NotNull(message = "Group is required")
+    @JsonBackReference
     private Group group;
 
     @Enumerated(EnumType.STRING)

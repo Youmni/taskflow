@@ -277,12 +277,11 @@ public class GroupService {
     }
 
     public TaskGroup getGroupByUserIdAndTaskId(int userId, int taskId) {
-        if(userService.isValidUser(userId) && isValidGroup(taskId)) {
+        if(userService.isValidUser(userId) && taskService.isValidTask(taskId)) {
             User user = userService.getUserById(userId);
             Task task = taskService.getTaskById(taskId);
 
-            List<UserGroup> userGroup = userGroupRepository
-                    .findByUser(user, Sort.by(Sort.Direction.ASC, "createdAt"));
+            List<UserGroup> userGroup = userGroupRepository.findByUser(user);
 
             for (UserGroup group : userGroup) {
                 List<TaskGroup> taskGroups = taskGroupRepository.findByGroup(group.getGroup());

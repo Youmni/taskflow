@@ -13,6 +13,7 @@ import java.util.List;
 
 public interface UserGroupRepository extends JpaRepository <UserGroup, Integer> {
     List<UserGroup> findByUser (User user, Sort sort);
+    List<UserGroup> findByUser (User user);
     List<UserGroup> findByGroup (Group group);
     List<UserGroup> findByUserAndGroup (User user, Group group);
     List<UserGroup> findByCreatedAtBetween (LocalDateTime from, LocalDateTime to);

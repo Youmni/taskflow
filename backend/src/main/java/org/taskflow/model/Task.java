@@ -1,6 +1,10 @@
 package org.taskflow.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
@@ -44,6 +48,8 @@ public class Task {
     @NotNull(message = "Due Date is required")
     @Future(message = "Due Date must be in the future")
     @Column(name = "due_date")
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    @JsonSerialize(using = LocalDateSerializer.class)
     private LocalDate dueDate;
 
     @Size(max = 256)
@@ -53,7 +59,6 @@ public class Task {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     @NotNull(message = "User is required")
-    @JsonBackReference
     private User user;
 
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
