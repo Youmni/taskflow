@@ -8,6 +8,6 @@ public class GroupCommand implements Runnable {
 
     @Override
     public void run() {
-        System.out.println("Use subcommands like 'create', 'add', or 'list' for group management.");
+        System.out.println("Use subcommands like 'create', 'add', or 'list' for group management");
     }
 }

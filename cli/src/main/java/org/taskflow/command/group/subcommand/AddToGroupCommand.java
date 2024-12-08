@@ -65,7 +65,6 @@ public class AddToGroupCommand implements Runnable {
     }
 
     private List<String> getEmails(List<String> emails){
-
         Console console = System.console();
 
         boolean isAddingUsers = true;

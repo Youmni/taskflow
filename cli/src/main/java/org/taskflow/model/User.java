@@ -1,10 +1,16 @@
 package org.taskflow.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class User {
     private int userId;
     private String username;
     private String email;
     private String password;
+
+    public User() {
+    }
 
     public User(String password, String email, String username) {
         this.password = password;
