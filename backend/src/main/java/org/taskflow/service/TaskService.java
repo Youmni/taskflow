@@ -185,11 +185,11 @@ public class TaskService {
 
 
     public ResponseEntity<String> deleteTask(int taskId, int userId) {
-        if(!isDeletePermissionGranted(userId, taskId)){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You do not have permission to delete this task");
-        }
         if (!taskRepository.existsByTaskId(taskId)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Task not found");
+        }
+        if(!isDeletePermissionGranted(userId, taskId)){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You do not have permission to delete this task");
         }
         try{
             Task taskToDelete = getTaskById(taskId);

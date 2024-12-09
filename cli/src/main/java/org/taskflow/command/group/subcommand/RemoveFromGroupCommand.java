@@ -34,19 +34,24 @@ public class RemoveFromGroupCommand implements Runnable {
             groupId = getInputValidated("Group ID: ", groupId, input -> input != null && !input.trim().isEmpty() && isValidInteger(input), "Group ID is required");
             emails = getEmails(emails);
 
-            ObjectMapper objectMapper = new ObjectMapper();
-            String json = objectMapper.writeValueAsString(emails);
-            HttpClient client = HttpClient.newHttpClient();
+            if(!emails.isEmpty()) {
 
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:8080/group/"+groupId+"/remove-users?ownerId="+ AuthSession.getUserIdFromToken()))
-                    .header("Content-Type", "application/json")
-                    .header("Authorization", "Bearer " + TokenService.getToken())
-                    .PUT(HttpRequest.BodyPublishers.ofString(json))
-                    .build();
+                ObjectMapper objectMapper = new ObjectMapper();
+                String json = objectMapper.writeValueAsString(emails);
+                HttpClient client = HttpClient.newHttpClient();
 
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            handleResponse(response);
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create("http://localhost:8080/group/" + groupId + "/remove-users?ownerId=" + AuthSession.getUserIdFromToken()))
+                        .header("Content-Type", "application/json")
+                        .header("Authorization", "Bearer " + TokenService.getToken())
+                        .PUT(HttpRequest.BodyPublishers.ofString(json))
+                        .build();
+
+                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                handleResponse(response);
+            }else{
+                System.out.println("No emails found to delete");
+            }
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
