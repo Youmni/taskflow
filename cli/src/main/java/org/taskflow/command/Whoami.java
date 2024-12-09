@@ -13,7 +13,6 @@ import java.net.http.HttpResponse;
 @CommandLine.Command(name = "whoami", description = "Returns the username of the user that is logged in")
 public class Whoami implements Runnable {
 
-
     @Override
     public void run() {
 

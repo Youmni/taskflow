@@ -11,9 +11,7 @@ public class TaskRequest {
     private String description;
     private Status status;
     private Priority priority;
-    private int day;
-    private int month;
-    private int year;
+    private LocalDate date;
     private String comment;
     private int userId;
 
@@ -21,16 +19,14 @@ public class TaskRequest {
     public TaskRequest() {
     }
 
-    public TaskRequest(String title, int userId, String comment, int year, int day, Priority priority, Status status, String description, int month) {
-        this.title = title;
-        this.userId = userId;
-        this.comment = comment;
-        this.year = year;
-        this.day = day;
-        this.priority = priority;
-        this.status = status;
+    public TaskRequest(String description, String title, Status status, Priority priority, LocalDate date, String comment, int userId) {
         this.description = description;
-        this.month = month;
+        this.title = title;
+        this.status = status;
+        this.priority = priority;
+        this.date = date;
+        this.comment = comment;
+        this.userId = userId;
     }
 
     public String getTitle() {
@@ -57,14 +53,6 @@ public class TaskRequest {
         this.status = status;
     }
 
-    public int getDay() {
-        return day;
-    }
-
-    public void setDay(int day) {
-        this.day = day;
-    }
-
     public Priority getPriority() {
         return priority;
     }
@@ -73,20 +61,12 @@ public class TaskRequest {
         this.priority = priority;
     }
 
-    public int getMonth() {
-        return month;
+    public LocalDate getDate() {
+        return date;
     }
 
-    public void setMonth(int month) {
-        this.month = month;
-    }
-
-    public int getYear() {
-        return year;
-    }
-
-    public void setYear(int year) {
-        this.year = year;
+    public void setDate(LocalDate date) {
+        this.date = date;
     }
 
     public String getComment() {

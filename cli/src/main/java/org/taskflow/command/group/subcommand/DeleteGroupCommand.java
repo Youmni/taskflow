@@ -1,6 +1,7 @@
 package org.taskflow.command.group.subcommand;
 
 import org.taskflow.AuthSession;
+import org.taskflow.Inputvalidator;
 import org.taskflow.service.TokenService;
 import picocli.CommandLine;
 
@@ -16,12 +17,12 @@ import java.util.Scanner;
 public class DeleteGroupCommand implements Runnable {
 
     @CommandLine.Option(names = {"-g", "--group"}, description = "Group you want to delete")
-    private int groupId;
+    private String groupId;
 
     @Override
     public void run() {
         try {
-            groupId =  groupId > 0 ? groupId : Integer.parseInt(getInput("Group ID: ", null));
+            groupId = getInputValidated("Group ID: ", groupId, input -> input != null && !input.trim().isEmpty() && isValidInteger(input), "Group ID is required");
 
             HttpClient client = HttpClient.newHttpClient();
 
@@ -38,17 +39,31 @@ public class DeleteGroupCommand implements Runnable {
             throw new RuntimeException(e);
         }
     }
+    private boolean isValidInteger(String input){
+        try{
+            int value = Integer.parseInt(input);
+            return true;
+        }catch (NumberFormatException e){
+            return false;
+        }
+    }
+    private String getInputValidated(String prompt, String value, Inputvalidator validator, String errorMSG) {
+        String input = value;
+        while (input == null || !validator.isValid(input.trim())) {
+            if (input != null) {
+                System.out.println(errorMSG);
+            }
+            input = getInput(prompt, null);
+        }
+        return input.trim();
+    }
     private String getInput(String prompt, String value){
         if(value == null){
             Console console = System.console();
-            if(console != null){
-                return console.readLine(prompt);
-            }else{
-                Scanner scanner = new Scanner(System.in);
-                return scanner.nextLine();
-            }
+            return console.readLine(prompt);
+        }else{
+            return value;
         }
-        return value;
     }
     private void handleResponse(HttpResponse<String> response) {
         System.out.println(response.body());

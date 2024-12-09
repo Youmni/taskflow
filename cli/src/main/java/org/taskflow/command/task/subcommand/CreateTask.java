@@ -1,6 +1,7 @@
 package org.taskflow.command.task.subcommand;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.taskflow.AuthSession;
 import org.taskflow.DTO.TaskCreationRequest;
 import org.taskflow.DTO.TaskRequest;
@@ -18,6 +19,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 
 @CommandLine.Command(name = "create", description = "Create a new task", mixinStandardHelpOptions = true)
@@ -51,7 +53,7 @@ public class CreateTask implements Runnable {
     public void run() {
 
         title = getInputValidated("Title: ", title, input -> input != null && input.trim().length() >=5 && input.trim().length()<=40, "Title must be between 5 and 40 characters");
-        description = getInputValidated("Description: ", description, input -> input != null && input.length() >= 25 && input.length()<=512, "Description must be between 25 and 512 characters");
+        description = getInputValidated("Description: ", description, input -> input != null && input.trim().length() >= 25 && input.trim().length()<=512, "Description must be between 25 and 512 characters");
 
         String statusInput = getInputValidated("Status (IN_PROGRESS, COMPLETED, CANCELLED, FAILED, VERIFIED, OVERDUE): ", null, input -> isValidEnum(Status.class, input), "Status is required. Accepted values are: IN_PROGRESS, COMPLETED, CANCELLED, FAILED, VERIFIED, OVERDUE");
         status = Status.valueOf(statusInput.trim().toUpperCase());
@@ -59,11 +61,9 @@ public class CreateTask implements Runnable {
         String priorityInput = getInputValidated("Priority (LOW, NORMAL, HIGH): ", null, input -> isValidEnum(Priority.class, input), "Priority is required. Accepted values are: LOW, NORMAL, HIGH");
         priority = Priority.valueOf(priorityInput.trim().toUpperCase());
 
-        System.out.println("Deadline: \n");
-        String day = getInputValidated("Day (__): ", null, input -> isValidInteger(input, 1, 31), "Day must be between 1 and 31");
-        String month = getInputValidated("Month (__): ", null, input -> isValidInteger(input, 1, 12), "Month must be between 1 and 12");
-        String year = getInputValidated("Year (__): ", null, input -> isValidInteger(input, LocalDate.now().getYear(), 2100), "Year must be between now and 2100");
-        dueDate = LocalDate.of(Integer.parseInt(year), Integer.parseInt(month), Integer.parseInt(day));
+        String dueDateInput = getInputValidated("Deadline (yyyy-mm-dd) (today -> 2100-12-31): ", null, input -> input == null || input.isEmpty() || (isValidDateFormat(input) && isDateInRange(input)), "Invalid date format. Please enter in yyyy-mm-dd format.");
+        if (dueDateInput != null && !dueDateInput.isEmpty()) dueDate = LocalDate.parse(dueDateInput);
+
 
         comment = getInputValidated("Comment: ", null, input -> input.length()<=512, "Comment must be between 0 and 512 characters");
 
@@ -121,6 +121,25 @@ public class CreateTask implements Runnable {
             return false;
         }
     }
+    private boolean isValidDateFormat(String input){
+        try{
+            LocalDate.parse(input);
+            return true;
+        }catch (Exception e){
+            return false;
+        }
+    }
+    private boolean isDateInRange(String input){
+        try{
+            LocalDate date = LocalDate.parse(input);
+            LocalDate now = LocalDate.now();
+            LocalDate upper = LocalDate.of(2100,12,31);
+
+            return !date.isBefore(now) && !date.isAfter(upper);
+        }catch (DateTimeParseException e){
+            return false;
+        }
+    }
     private <T extends Enum<T>> boolean isValidEnum(Class<T> enumClass, String input){
         try{
             Enum.valueOf(enumClass, input.toUpperCase());
@@ -135,9 +154,7 @@ public class CreateTask implements Runnable {
             TaskRequest taskRequest = new TaskRequest();
             taskRequest.setTitle(title);
             taskRequest.setDescription(description);
-            taskRequest.setDay(dueDate.getDayOfWeek().getValue());
-            taskRequest.setMonth(dueDate.getMonth().getValue());
-            taskRequest.setYear(dueDate.getYear());
+            taskRequest.setDate(dueDate);
             taskRequest.setStatus(status);
             taskRequest.setPriority(priority);
             taskRequest.setComment(comment);
@@ -149,6 +166,7 @@ public class CreateTask implements Runnable {
             taskCreationRequest.setGroup(group);
 
             ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.registerModule(new JavaTimeModule());
             String json = objectMapper.writeValueAsString(taskCreationRequest);
 
             HttpClient httpClient = HttpClient.newHttpClient();

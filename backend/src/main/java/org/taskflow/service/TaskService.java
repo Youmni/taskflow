@@ -83,14 +83,12 @@ public class TaskService {
             TaskRequest taskRequest = taskCreationRequest.getTaskRequest();
             HashMap<Integer, Permission> groups = taskCreationRequest.getGroup();
 
-            LocalDate dueDate = LocalDate.of(taskRequest.getYear(), taskRequest.getMonth(), taskRequest.getDay());
-
             Task task = new Task(
                     taskRequest.getTitle(),
                     taskRequest.getDescription(),
                     taskRequest.getStatus(),
                     taskRequest.getPriority(),
-                    dueDate,
+                    taskRequest.getDate(),
                     taskRequest.getComment(),
                     null
             );

@@ -30,7 +30,7 @@ public class RegistrationCommand implements Runnable {
         try{
 
             username = getInputValidated("Username: ", username, input -> input.length() >= 5 && input.length() <=15, "Username must be between 5 and 15 characters");
-            email = getInputValidated("Email: ", email, input -> isValidEmail(email), "Email must be a valid email address");
+            email = getInputValidated("Email: ", email, this::isValidEmail, "Email must be a valid email address");
             password = getInputValidated("Password: ", password, input ->input.length()>=8 && input.length()<=50,"Password must be between 8 and 50 characters");
 
             String jsonPayload = String.format("{\"username\": \"%s\", \"email\": \"%s\", \"password\": \"%s\"}", username, email, password);

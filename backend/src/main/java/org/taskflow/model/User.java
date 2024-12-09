@@ -34,7 +34,6 @@ public class User {
     private String email;
 
     @NotBlank(message = "Password cannot be empty or null")
-    @Size(min = 8, max = 50, message = "Password must be between 8 and 50 characters")
     @Column(name = "password")
     private String password;
 

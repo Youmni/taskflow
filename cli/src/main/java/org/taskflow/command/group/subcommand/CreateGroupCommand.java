@@ -1,6 +1,7 @@
 package org.taskflow.command.group.subcommand;
 
 import org.taskflow.AuthSession;
+import org.taskflow.Inputvalidator;
 import org.taskflow.service.TokenService;
 import picocli.CommandLine;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,43 +31,49 @@ public class CreateGroupCommand implements Runnable {
     @Override
     public void run() {
 
-            Console console = System.console();
-            groupName = getInput("Enter the name of the group:", groupName);
-            description = getInput("Enter the description of the group:", description);
+        Console console = System.console();
+        groupName = getInputValidated("Enter the name of the group:", groupName, input -> input.trim().length() >=5 && input.length()<=20, "Name of group must be between 5 and 20 characters");
+        description = getInputValidated("Enter the description of the group:", description, input -> input.trim().length()<=80, "Description must be between 0 and 80 characters");
 
-            String answer = console.readLine("Would you like to add users to this group now? (Y/n)");
-            if (answer.equalsIgnoreCase("y") || answer.equalsIgnoreCase("yes")) {
-                boolean isAddingUsers = true;
+        String answer = console.readLine("Would you like to add users to this group now? (Y/n)");
+        if (answer.equalsIgnoreCase("y") || answer.equalsIgnoreCase("yes")) {
+            boolean isAddingUsers = true;
 
-                System.out.println("Enter 'q' or 'exit' to stop");
-                while (isAddingUsers) {
-                    String output = console.readLine("Enter the email address of the user:");
-                    if(output == null || output.isEmpty() || output.trim().equalsIgnoreCase("q") || output.trim().equalsIgnoreCase("exit")) {
-                        isAddingUsers = false;
-                    }else{
-                        emails.add(output);
-                    }
+            System.out.println("Enter 'q' or 'exit' to stop");
+            while (isAddingUsers) {
+                String output = console.readLine("Enter the email address of the user:");
+                if(output == null || output.isEmpty() || output.trim().equalsIgnoreCase("q") || output.trim().equalsIgnoreCase("exit")) {
+                    isAddingUsers = false;
+                }else{
+                    emails.add(output);
                 }
             }
+        }
 
-            if(emails.isEmpty()) {
-                createGroupWithoutUsers();
-            }else {
-                createGroupWithUsers();
-            }
+        if(emails.isEmpty()) {
+            createGroupWithoutUsers();
+        }else {
+            createGroupWithUsers();
+        }
     }
 
+    private String getInputValidated(String prompt, String value, Inputvalidator validator, String errorMSG) {
+        String input = value;
+        while (input == null || !validator.isValid(input.trim())) {
+            if (input != null) {
+                System.out.println(errorMSG);
+            }
+            input = getInput(prompt, null);
+        }
+        return input.trim();
+    }
     private String getInput(String prompt, String value){
         if(value == null){
             Console console = System.console();
-            if(console != null){
-                return console.readLine(prompt);
-            }else{
-                Scanner scanner = new Scanner(System.in);
-                return scanner.nextLine();
-            }
+            return console.readLine(prompt);
+        }else{
+            return value;
         }
-        return value;
     }
 
     private void createGroupWithUsers() {

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.taskflow.AuthSession;
+import org.taskflow.Inputvalidator;
 import org.taskflow.service.TokenService;
 import picocli.CommandLine;
 
@@ -22,7 +23,7 @@ import java.util.Scanner;
 public class RemoveFromGroupCommand implements Runnable {
 
     @CommandLine.Option(names = {"-g", "--group"}, description = "Give the ID of the group you want to add")
-    private int groupId;
+    private String groupId;
     @CommandLine.Option(names = {"-e", "--email"}, description = "Add emails to a group")
     private List<String> emails = new ArrayList<>();
 
@@ -30,7 +31,7 @@ public class RemoveFromGroupCommand implements Runnable {
     @Override
     public void run() {
         try {
-            groupId =  groupId > 0 ? groupId : Integer.parseInt(getInput("Group ID: ", null));
+            groupId = getInputValidated("Group ID: ", groupId, input -> input != null && !input.trim().isEmpty() && isValidInteger(input), "Group ID is required");
             emails = getEmails(emails);
 
             ObjectMapper objectMapper = new ObjectMapper();
@@ -51,17 +52,31 @@ public class RemoveFromGroupCommand implements Runnable {
         }
     }
 
-    private String getInput(String prompt, String value){
-        if(value == null || value.isEmpty()){
-            Console console = System.console();
-            if(console != null){
-                return console.readLine(prompt);
-            }else{
-                Scanner scanner = new Scanner(System.in);
-                return scanner.nextLine();
-            }
+    private boolean isValidInteger(String input){
+        try{
+            int value = Integer.parseInt(input);
+            return true;
+        }catch (NumberFormatException e){
+            return false;
         }
-        return value;
+    }
+    private String getInputValidated(String prompt, String value, Inputvalidator validator, String errorMSG) {
+        String input = value;
+        while (input == null || !validator.isValid(input.trim())) {
+            if (input != null) {
+                System.out.println(errorMSG);
+            }
+            input = getInput(prompt, null);
+        }
+        return input.trim();
+    }
+    private String getInput(String prompt, String value){
+        if(value == null){
+            Console console = System.console();
+            return console.readLine(prompt);
+        }else{
+            return value;
+        }
     }
 
     private List<String> getEmails(List<String> emails){
