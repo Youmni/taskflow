@@ -89,7 +89,7 @@ public class CreateTask implements Runnable {
             } else {
                 System.out.println("Invalid format for group permissions. Please use 'groupID:permission'.");
             }
-            groupPermissionsInput = getInput("Add another group permission or 'done' to finish: ", null);
+            groupPermissionsInput = getInput("Add another group permission or 'q' to finish: ", null);
         }
 
         handleResponse(createTask());

@@ -1,6 +1,7 @@
 package org.taskflow.command;
 
 import org.taskflow.AuthSession;
+import org.taskflow.Inputvalidator;
 import picocli.CommandLine;
 
 import java.io.Console;
@@ -9,6 +10,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Scanner;
+import java.util.regex.Pattern;
 
 @CommandLine.Command(name = "registration", description = "Register a new user for the system", mixinStandardHelpOptions = true)
 public class RegistrationCommand implements Runnable {
@@ -27,9 +29,9 @@ public class RegistrationCommand implements Runnable {
     public void run() {
         try{
 
-            username = getInput("Username: ", username);
-            email = getInput("Email: ", email);
-            password = getInput("Password: ", password);
+            username = getInputValidated("Username: ", username, input -> input.length() >= 5 && input.length() <=15, "Username must be between 5 and 15 characters");
+            email = getInputValidated("Email: ", email, input -> isValidEmail(email), "Email must be a valid email address");
+            password = getInputValidated("Password: ", password, input ->input.length()>=8 && input.length()<=50,"Password must be between 8 and 50 characters");
 
             String jsonPayload = String.format("{\"username\": \"%s\", \"email\": \"%s\", \"password\": \"%s\"}", username, email, password);
 
@@ -50,17 +52,23 @@ public class RegistrationCommand implements Runnable {
         }
     }
 
+    private String getInputValidated(String prompt, String value, Inputvalidator validator, String errorMSG) {
+        String input = value;
+        while (input == null || !validator.isValid(input.trim())) {
+            if (input != null) {
+                System.out.println(errorMSG);
+            }
+            input = getInput(prompt, null);
+        }
+        return input.trim();
+    }
     private String getInput(String prompt, String value){
         if(value == null){
             Console console = System.console();
-            if(console != null){
-                return console.readLine(prompt);
-            }else{
-                Scanner scanner = new Scanner(System.in);
-                return scanner.nextLine();
-            }
+            return console.readLine(prompt);
+        }else{
+            return value;
         }
-        return value;
     }
 
     private void handleResponse(HttpResponse<String> response){
@@ -69,5 +77,9 @@ public class RegistrationCommand implements Runnable {
         }else{
             System.out.println(response.body());
         }
+    }
+    private boolean isValidEmail(String email) {
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+        return Pattern.compile(emailRegex).matcher(email).matches();
     }
 }

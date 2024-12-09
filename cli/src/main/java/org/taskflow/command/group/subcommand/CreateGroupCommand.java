@@ -37,6 +37,8 @@ public class CreateGroupCommand implements Runnable {
             String answer = console.readLine("Would you like to add users to this group now? (Y/n)");
             if (answer.equalsIgnoreCase("y") || answer.equalsIgnoreCase("yes")) {
                 boolean isAddingUsers = true;
+
+                System.out.println("Enter 'q' or 'exit' to stop");
                 while (isAddingUsers) {
                     String output = console.readLine("Enter the email address of the user:");
                     if(output == null || output.isEmpty() || output.trim().equalsIgnoreCase("q") || output.trim().equalsIgnoreCase("exit")) {

@@ -68,6 +68,7 @@ public class AddToGroupCommand implements Runnable {
         Console console = System.console();
 
         boolean isAddingUsers = true;
+        System.out.println("Enter 'q' or 'exit' to stop");
         while (isAddingUsers) {
             String output = console.readLine("Enter the email address of the user:");
             if(output == null || output.isEmpty() || output.trim().equalsIgnoreCase("q") || output.trim().equalsIgnoreCase("exit")) {
