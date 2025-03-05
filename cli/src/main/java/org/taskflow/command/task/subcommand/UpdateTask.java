@@ -3,10 +3,7 @@ package org.taskflow.command.task.subcommand;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.taskflow.AuthSession;
-import org.taskflow.DTO.TaskCreationRequest;
-import org.taskflow.DTO.TaskRequest;
 import org.taskflow.Inputvalidator;
-import org.taskflow.enums.Permission;
 import org.taskflow.enums.Priority;
 import org.taskflow.enums.Status;
 import org.taskflow.service.TokenService;
@@ -21,8 +18,6 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
-import java.util.HashMap;
-import java.util.Map;
 
 @CommandLine.Command(name = "update", description = "Update a task", mixinStandardHelpOptions = true)
 public class UpdateTask implements Runnable {

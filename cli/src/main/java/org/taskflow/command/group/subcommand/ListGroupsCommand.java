@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.taskflow.AuthSession;
-import org.taskflow.DTO.GroupRequestDTO;
+import org.taskflow.dtos.GroupRequestDTO;
 import org.taskflow.service.TokenService;
 import picocli.CommandLine;
 

@@ -17,10 +17,7 @@ import java.util.regex.Pattern;
 
 @Service
 public class UserService {
-
     BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
-
-
     private UserRepository userRepository;
 
     @Autowired
@@ -32,34 +29,38 @@ public class UserService {
     }
 
     public ResponseEntity<String> createUser(UserDTO userDTO) {
-        try{
-            if(userRepository.existsByEmail(userDTO.getEmail())){
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("User already exist");
-            }
+        if (userRepository.existsByEmail(userDTO.getEmail())) {
+            return ResponseEntity.badRequest().body("User already exists");
+        }
 
-            User user = new User(userDTO.getUsername(), userDTO.getEmail(), bCryptPasswordEncoder.encode(userDTO.getPassword()));
+        try {
+            User user = new User(
+                    userDTO.getUsername(),
+                    userDTO.getEmail(),
+                    bCryptPasswordEncoder.encode(userDTO.getPassword())
+            );
             userRepository.save(user);
             return ResponseEntity.status(HttpStatus.CREATED).body("User successfully added");
-        }catch(Exception e){
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("There was an error processing your request: " + e.getMessage());
+                    .body("Error processing your request: " + e.getMessage());
         }
     }
 
-    public ResponseEntity<String> authenticateUser(AuthDTO authDTO) throws JOSEException {
+    public ResponseEntity<String> authenticateUser(AuthDTO authDTO) {
         try {
             Optional<User> userOpt = userRepository.findByUsername(authDTO.getUsername()).stream().findFirst();
             if (userOpt.isEmpty() || !bCryptPasswordEncoder.matches(authDTO.getPassword(), userOpt.get().getPassword())) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
             }
+
             String token = jwtService.generateToken(userOpt.get().getUserId());
-            return ResponseEntity.status(HttpStatus.OK).body(token);
-        }catch (JOSEException e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error has occurred during authentication");
+            return ResponseEntity.ok(token);
+        } catch (JOSEException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Authentication error: " + e.getMessage());
         }
     }
-
 
     public ResponseEntity<String> deleteUser (int userId) {
         if(!userRepository.existsByUserId(userId)){

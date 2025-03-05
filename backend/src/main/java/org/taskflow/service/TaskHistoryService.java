@@ -54,11 +54,11 @@ public class TaskHistoryService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("No task found. Task history cannot be created");
         }
+        if (!userRepository.existsByUserId(userId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("User not found. User history cannot be created");
+        }
         try{
-            if (!userRepository.existsByUserId(userId)) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("User not found. User history cannot be created");
-            }
             List<User> users = userRepository.findByUserId(userId);
             List<Task> originalTasks = taskRepository.findByTaskId(task.getTaskId());
 

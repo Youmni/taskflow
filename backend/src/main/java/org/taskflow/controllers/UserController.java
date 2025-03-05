@@ -28,11 +28,7 @@ public class UserController {
     @CrossOrigin
     @PostMapping(value = "/authenticate")
     public ResponseEntity<String> authenticateUser(@Valid @RequestBody AuthDTO authDTO) {
-        try {
-            return userService.authenticateUser(authDTO);
-        }catch (JOSEException e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
+        return userService.authenticateUser(authDTO);
     }
     
     @CrossOrigin

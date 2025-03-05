@@ -36,28 +36,32 @@ public class UserGroupService {
     }
 
     public void addUserGroup(int groupId, int userId) {
-        if(userService.isValidUser(userId) && groupService.isValidGroup(groupId)) {
-            try{
-                User user = userService.getUserById(userId);
-                Group group = groupService.getGroupById(groupId);
+        if (!userService.isValidUser(userId) || !groupService.isValidGroup(groupId)) {
+            return;
+        }
 
-                if (user == null || group == null) {
-                    throw new Exception("User or Group not found");
-                }
+        try {
+            User user = userService.getUserById(userId);
+            Group group = groupService.getGroupById(groupId);
 
-                UserGroupKey userGroupKey = new UserGroupKey(userId, groupId);
-                UserGroup userGroup = new UserGroup(user, group);
-                userGroup.setId(userGroupKey);
-
-                userGroupRepository.save(userGroup);
-            }catch(Exception e){
-                System.err.println(e.getMessage());
+            if (user == null || group == null) {
+                throw new IllegalArgumentException("User or Group not found");
             }
+
+            UserGroup userGroup = new UserGroup(user, group);
+            UserGroupKey userGroupKey = new UserGroupKey(userId, groupId);
+            userGroup.setId(userGroupKey);
+
+            userGroupRepository.save(userGroup);
+        } catch (IllegalArgumentException e) {
+            System.err.println("Error: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Unexpected error: " + e.getMessage());
         }
     }
 
-    public List<String> getEmailsByGroupId(int groupId) {
 
+    public List<String> getEmailsByGroupId(int groupId) {
         if(!groupService.isValidGroup(groupId)) {
             return new ArrayList<>();
         }

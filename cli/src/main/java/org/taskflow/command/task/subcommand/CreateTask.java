@@ -3,8 +3,8 @@ package org.taskflow.command.task.subcommand;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.taskflow.AuthSession;
-import org.taskflow.DTO.TaskCreationRequest;
-import org.taskflow.DTO.TaskRequest;
+import org.taskflow.dtos.TaskCreationDTO;
+import org.taskflow.dtos.TaskDTO;
 import org.taskflow.Inputvalidator;
 import org.taskflow.enums.Permission;
 import org.taskflow.enums.Priority;
@@ -148,26 +148,25 @@ public class CreateTask implements Runnable {
             return false;
         }
     }
+
     private HttpResponse<String> createTask() {
         try {
-
-            TaskRequest taskRequest = new TaskRequest();
+            TaskDTO taskRequest = new TaskDTO();
             taskRequest.setTitle(title);
             taskRequest.setDescription(description);
-            taskRequest.setDate(dueDate);
+            taskRequest.setDueDate(dueDate);
             taskRequest.setStatus(status);
             taskRequest.setPriority(priority);
             taskRequest.setComment(comment);
             taskRequest.setUserId(AuthSession.getUserIdFromToken());
 
-
-            TaskCreationRequest taskCreationRequest = new TaskCreationRequest();
-            taskCreationRequest.setTaskRequest(taskRequest);
-            taskCreationRequest.setGroup(group);
+            TaskCreationDTO taskCreationDTO = new TaskCreationDTO();
+            taskCreationDTO.setTaskDTO(taskRequest);
+            taskCreationDTO.setGroup(group);
 
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.registerModule(new JavaTimeModule());
-            String json = objectMapper.writeValueAsString(taskCreationRequest);
+            String json = objectMapper.writeValueAsString(taskCreationDTO);
 
             HttpClient httpClient = HttpClient.newHttpClient();
 
