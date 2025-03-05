@@ -1,4 +1,4 @@
-package org.taskflow.dtos;
+package org.taskflow.dtos.task;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

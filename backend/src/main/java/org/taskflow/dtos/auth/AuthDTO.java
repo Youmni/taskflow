@@ -1,12 +1,13 @@
-package org.taskflow.dtos;
+package org.taskflow.dtos.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
-public class UserDTO {
+public class AuthDTO {
     private String username;
-    private String email;
     private String password;
 }
