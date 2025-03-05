@@ -1,10 +1,8 @@
-package org.taskflow.controller;
+package org.taskflow.controllers;
 
 import org.springframework.web.bind.annotation.*;
-import org.taskflow.DTO.TaskHistoryDTO;
-import org.taskflow.model.Taskhistory;
+import org.taskflow.dtos.TaskHistoryDTO;
 import org.taskflow.service.TaskHistoryService;
-import org.taskflow.service.UserService;
 
 import java.util.List;
 

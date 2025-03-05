@@ -1,9 +1,10 @@
-package org.taskflow.model;
+package org.taskflow.models;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.CreationTimestamp;
+import org.taskflow.enums.Permission;
 
 import java.time.LocalDateTime;
 

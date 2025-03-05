@@ -5,7 +5,8 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.taskflow.model.*;
+import org.taskflow.enums.Permission;
+import org.taskflow.models.*;
 import org.taskflow.repository.*;
 
 import java.util.ArrayList;

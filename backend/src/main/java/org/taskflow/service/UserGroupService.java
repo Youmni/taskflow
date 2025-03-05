@@ -3,10 +3,10 @@ package org.taskflow.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
-import org.taskflow.model.Group;
-import org.taskflow.model.User;
-import org.taskflow.model.UserGroup;
-import org.taskflow.model.UserGroupKey;
+import org.taskflow.models.Group;
+import org.taskflow.models.User;
+import org.taskflow.models.UserGroup;
+import org.taskflow.models.UserGroupKey;
 import org.taskflow.repository.UserGroupRepository;
 
 import java.util.ArrayList;

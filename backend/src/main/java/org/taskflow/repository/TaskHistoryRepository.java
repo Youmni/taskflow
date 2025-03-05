@@ -4,7 +4,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.taskflow.model.*;
+import org.taskflow.enums.Priority;
+import org.taskflow.enums.Status;
+import org.taskflow.models.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

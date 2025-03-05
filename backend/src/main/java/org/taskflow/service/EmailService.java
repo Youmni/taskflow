@@ -5,14 +5,12 @@ import jakarta.mail.internet.MimeMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-import org.taskflow.model.Permission;
-import org.taskflow.model.Task;
-import org.thymeleaf.TemplateEngine;
+import org.taskflow.enums.Permission;
+import org.taskflow.models.Task;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import org.thymeleaf.context.Context;
 import java.util.HashMap;
-import java.util.List;
 
 @Service
 public class EmailService {

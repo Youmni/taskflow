@@ -1,4 +1,4 @@
-package org.taskflow.model;
+package org.taskflow.models;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;

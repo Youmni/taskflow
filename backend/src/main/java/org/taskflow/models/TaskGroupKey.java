@@ -1,4 +1,4 @@
-package org.taskflow.model;
+package org.taskflow.models;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -7,18 +7,18 @@ import java.io.Serializable;
 import java.util.Objects;
 
 @Embeddable
-public class UserGroupKey implements Serializable {
+public class TaskGroupKey implements Serializable {
 
-    @Column(name = "user_id")
-    private int userId;
+    @Column(name = "task_id")
+    private int taskId;
 
     @Column(name = "group_id")
     private int groupId;
 
-    protected UserGroupKey() {}
+    protected TaskGroupKey() {}
 
-    public UserGroupKey(int userId, int groupId) {
-        this.userId = userId;
+    public TaskGroupKey(int taskId, int groupId) {
+        this.taskId = taskId;
         this.groupId = groupId;
     }
 
@@ -26,21 +26,21 @@ public class UserGroupKey implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        UserGroupKey that = (UserGroupKey) o;
-        return userId == that.userId && groupId == that.groupId;
+        TaskGroupKey that = (TaskGroupKey) o;
+        return taskId == that.taskId && groupId == that.groupId;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(userId, groupId);
+        return Objects.hash(taskId, groupId);
     }
 
-    public int getUserId() {
-        return userId;
+    public int getTaskId() {
+        return taskId;
     }
 
-    public void setUserId(int userId) {
-        this.userId = userId;
+    public void setTaskId(int taskId) {
+        this.taskId = taskId;
     }
 
     public int getGroupId() {

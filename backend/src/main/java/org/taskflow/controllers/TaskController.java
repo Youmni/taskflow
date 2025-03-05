@@ -1,18 +1,16 @@
-package org.taskflow.controller;
+package org.taskflow.controllers;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.taskflow.DTO.TaskDTO;
-import org.taskflow.model.*;
-import org.taskflow.repository.UserRepository;
+import org.taskflow.dtos.TaskDTO;
+import org.taskflow.enums.Priority;
+import org.taskflow.enums.Status;
+import org.taskflow.models.*;
 import org.taskflow.service.TaskService;
-import org.taskflow.service.UserService;
-import org.taskflow.wrapper.TaskCreationRequest;
-import org.taskflow.wrapper.TaskRequest;
+import org.taskflow.dtos.TaskCreationDTO;
 
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
 
 @RestController
@@ -27,8 +25,8 @@ public class TaskController {
 
     @CrossOrigin
     @PostMapping(value = "/create")
-    public ResponseEntity<String> createTask(@RequestBody TaskCreationRequest taskCreationRequest) {
-        return taskService.createTask(taskCreationRequest);
+    public ResponseEntity<String> createTask(@RequestBody TaskCreationDTO taskCreationDTO) {
+        return taskService.createTask(taskCreationDTO);
     }
 
     @CrossOrigin

@@ -1,13 +1,13 @@
-package org.taskflow.controller;
+package org.taskflow.controllers;
 
 import com.nimbusds.jose.JOSEException;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.taskflow.DTO.AuthDTO;
-import org.taskflow.DTO.UserDTO;
-import org.taskflow.model.User;
+import org.taskflow.dtos.AuthDTO;
+import org.taskflow.dtos.UserDTO;
+import org.taskflow.models.User;
 import org.taskflow.service.UserService;
 
 @RestController

@@ -1,4 +1,4 @@
-package org.taskflow.model;
+package org.taskflow.enums;
 
 public enum Status {
     IN_PROGRESS,

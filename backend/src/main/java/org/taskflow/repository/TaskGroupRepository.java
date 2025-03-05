@@ -1,10 +1,10 @@
 package org.taskflow.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.taskflow.model.Group;
-import org.taskflow.model.Permission;
-import org.taskflow.model.Task;
-import org.taskflow.model.TaskGroup;
+import org.taskflow.models.Group;
+import org.taskflow.enums.Permission;
+import org.taskflow.models.Task;
+import org.taskflow.models.TaskGroup;
 
 import java.util.List;
 

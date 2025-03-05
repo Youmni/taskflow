@@ -7,13 +7,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.taskflow.DTO.GroupDTO;
-import org.taskflow.DTO.GroupRequestDTO;
-import org.taskflow.model.*;
+import org.taskflow.dtos.GroupDTO;
+import org.taskflow.dtos.GroupRegistrationsDTO;
+import org.taskflow.models.*;
 import org.taskflow.repository.GroupRepository;
 import org.taskflow.repository.TaskGroupRepository;
 import org.taskflow.repository.UserGroupRepository;
-import org.taskflow.wrapper.UserGroupRequest;
 
 import java.util.*;
 
@@ -253,27 +252,27 @@ public class GroupService {
     }
 
 
-    public List<GroupRequestDTO> getGroupsByUserId(int userId) {
+    public List<GroupRegistrationsDTO> getGroupsByUserId(int userId) {
         if (!userService.isValidUser(userId)) {
             System.out.println("user is not valid");
             return new ArrayList<>();
         }
         User user = userService.getUserById(userId);
         List<Group> groupList = groupRepository.findByCreatedBy(user, Sort.by(Sort.Direction.ASC, "createdAt"));
-        List<GroupRequestDTO> groupRequestDTOList = new ArrayList<>();
+        List<GroupRegistrationsDTO> groupRegistrationsDTOList = new ArrayList<>();
 
         for(Group group : groupList) {
-            GroupRequestDTO groupRequestDTO = new GroupRequestDTO();
-            groupRequestDTO.setGroupId(group.getGroupId());
-            groupRequestDTO.setGroupName(group.getGroupName());
-            groupRequestDTO.setDescription(group.getDescription());
+            GroupRegistrationsDTO groupRegistrationsDTO = new GroupRegistrationsDTO();
+            groupRegistrationsDTO.setGroupId(group.getGroupId());
+            groupRegistrationsDTO.setGroupName(group.getGroupName());
+            groupRegistrationsDTO.setDescription(group.getDescription());
 
             List<String> emails = userGroupService.getEmailsByGroupId(group.getGroupId());
-            groupRequestDTO.setEmails(emails);
+            groupRegistrationsDTO.setEmails(emails);
 
-            groupRequestDTOList.add(groupRequestDTO);
+            groupRegistrationsDTOList.add(groupRegistrationsDTO);
         }
-        return groupRequestDTOList;
+        return groupRegistrationsDTOList;
     }
 
     public TaskGroup getGroupByUserIdAndTaskId(int userId, int taskId) {

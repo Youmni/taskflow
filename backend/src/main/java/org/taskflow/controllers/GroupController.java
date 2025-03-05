@@ -1,17 +1,14 @@
-package org.taskflow.controller;
+package org.taskflow.controllers;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.taskflow.DTO.GroupDTO;
-import org.taskflow.DTO.GroupRequestDTO;
-import org.taskflow.DTO.GroupWithUsersDTO;
-import org.taskflow.model.Group;
-import org.taskflow.model.User;
-import org.taskflow.model.UserGroup;
+import org.taskflow.dtos.GroupDTO;
+import org.taskflow.dtos.GroupRegistrationsDTO;
+import org.taskflow.models.Group;
+import org.taskflow.models.User;
 import org.taskflow.service.GroupService;
 import org.taskflow.service.UserService;
-import org.taskflow.wrapper.UserGroupRequest;
 
 import java.util.List;
 
@@ -29,7 +26,7 @@ public class GroupController {
 
     @CrossOrigin
     @PostMapping(value = "/createWithUsers/{ownerId}")
-    public ResponseEntity<String> createGroupWithUsers(@RequestBody GroupWithUsersDTO groupDTO, @PathVariable int ownerId) {
+    public ResponseEntity<String> createGroupWithUsers(@RequestBody GroupRegistrationsDTO groupDTO, @PathVariable int ownerId) {
         if(!userService.isValidUser(ownerId)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid ownerId");
         }
@@ -71,7 +68,7 @@ public class GroupController {
 
     @CrossOrigin
     @GetMapping(value = "/{userId}")
-    public List<GroupRequestDTO> getGroupsByUserId(@PathVariable int userId) {
+    public List<GroupRegistrationsDTO> getGroupsByUserId(@PathVariable int userId) {
         return groupService.getGroupsByUserId(userId);
     }
 }

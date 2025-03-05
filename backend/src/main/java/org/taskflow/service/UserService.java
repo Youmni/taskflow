@@ -2,19 +2,16 @@ package org.taskflow.service;
 
 import com.nimbusds.jose.JOSEException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.taskflow.DTO.AuthDTO;
-import org.taskflow.DTO.UserDTO;
+import org.taskflow.dtos.AuthDTO;
+import org.taskflow.dtos.UserDTO;
 import org.taskflow.config.JwtService;
-import org.taskflow.model.User;
+import org.taskflow.models.User;
 import org.taskflow.repository.UserRepository;
 
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 

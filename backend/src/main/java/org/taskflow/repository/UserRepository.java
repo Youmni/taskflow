@@ -1,10 +1,8 @@
 package org.taskflow.repository;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.taskflow.model.User;
-import org.springframework.data.domain.Pageable;
+import org.taskflow.models.User;
 
 
 import java.time.LocalDateTime;

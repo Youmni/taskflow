@@ -2,12 +2,10 @@ package org.taskflow.repository;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.taskflow.model.Priority;
-import org.taskflow.model.Status;
-import org.taskflow.model.Task;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.taskflow.model.User;
+import org.taskflow.enums.Priority;
+import org.taskflow.enums.Status;
+import org.taskflow.models.Task;
+import org.taskflow.models.User;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

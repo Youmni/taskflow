@@ -1,13 +1,10 @@
 package org.taskflow.repository;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.taskflow.model.Group;
-import org.taskflow.model.User;
+import org.taskflow.models.Group;
+import org.taskflow.models.User;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 public interface GroupRepository extends JpaRepository<Group, Integer> {

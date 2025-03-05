@@ -8,22 +8,22 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.taskflow.DTO.TaskDTO;
-import org.taskflow.model.*;
+import org.taskflow.dtos.TaskDTO;
+import org.taskflow.enums.Permission;
+import org.taskflow.enums.Priority;
+import org.taskflow.enums.Status;
+import org.taskflow.models.*;
 import org.taskflow.repository.TaskGroupRepository;
 import org.taskflow.repository.TaskHistoryRepository;
 import org.taskflow.repository.TaskRepository;
 import org.taskflow.repository.UserGroupRepository;
-import org.taskflow.wrapper.TaskCreationRequest;
-import org.taskflow.wrapper.TaskRequest;
+import org.taskflow.dtos.TaskCreationDTO;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 public class TaskService {
@@ -77,18 +77,18 @@ public class TaskService {
         this.taskRepository = taskRepository;
     }
 
-    public ResponseEntity<String> createTask(TaskCreationRequest taskCreationRequest) {
+    public ResponseEntity<String> createTask(TaskCreationDTO taskCreationDTO) {
         try {
 
-            TaskRequest taskRequest = taskCreationRequest.getTaskRequest();
-            HashMap<Integer, Permission> groups = taskCreationRequest.getGroup();
+            TaskDTO taskRequest = taskCreationDTO.getTaskDTO();
+            HashMap<Integer, Permission> groups = taskCreationDTO.getGroup();
 
             Task task = new Task(
                     taskRequest.getTitle(),
                     taskRequest.getDescription(),
                     taskRequest.getStatus(),
                     taskRequest.getPriority(),
-                    taskRequest.getDate(),
+                    taskRequest.getDueDate(),
                     taskRequest.getComment(),
                     null
             );
@@ -125,7 +125,7 @@ public class TaskService {
         }
     }
 
-    public ResponseEntity<String> updateTask(int taskId, int userIdMakingChanges, String title, String description, Status status,Priority priority,LocalDate dueDate, String comment){
+    public ResponseEntity<String> updateTask(int taskId, int userIdMakingChanges, String title, String description, Status status, Priority priority, LocalDate dueDate, String comment){
         System.out.println("1");
         if (!taskRepository.existsByTaskId(taskId)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Task not found");
